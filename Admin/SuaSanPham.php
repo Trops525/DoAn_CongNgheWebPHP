@@ -208,7 +208,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </thead>
                 <tbody>
                     <?php
-                    $sql_sizes = "SELECT KichThuoc, SoLuong FROM tbl_bienthe WHERE IdSanPham = $id ORDER BY KichThuoc";
+                    $sql_sizes = "SELECT KichThuoc, SoLuong FROM tbl_bienthe WHERE IdSanPham = $id 
+                                  ORDER BY 
+                                      CASE UPPER(TRIM(KichThuoc))
+                                          WHEN '3XS' THEN 1 WHEN '2XS' THEN 2 WHEN 'XS' THEN 3
+                                          WHEN 'S' THEN 4 WHEN 'M' THEN 5 WHEN 'L' THEN 6
+                                          WHEN 'XL' THEN 7 WHEN '2XL' THEN 8 WHEN 'XXL' THEN 9
+                                          WHEN '3XL' THEN 10 WHEN 'XXXL' THEN 11 WHEN '4XL' THEN 12 WHEN '5XL' THEN 13
+                                          WHEN 'FREESIZE' THEN 99 ELSE 50
+                                      END, CAST(KichThuoc AS UNSIGNED) ASC, KichThuoc ASC";
                     $result_sizes = $ket_noi->query($sql_sizes);
                     
                     if ($result_sizes && $result_sizes->num_rows > 0) {

@@ -232,18 +232,65 @@ class MATHANG {
         }
     }
 
-    // Lấy danh sách size duy nhất của sản phẩm kèm số lượng tồn
+    // Sắp xếp danh sách size theo chuẩn thời trang (XS -> S -> M -> L -> XL -> XXL -> 3XL -> Freesize hoặc số 28 -> 29 -> 30...)
+    public static function sapxepkichthuoc(&$sizes) {
+        $order = [
+            '3xs' => 1, '2xs' => 2, 'xs' => 3,
+            's' => 4, 'm' => 5, 'l' => 6,
+            'xl' => 7, '2xl' => 8, 'xxl' => 9,
+            '3xl' => 10, 'xxxl' => 11, '4xl' => 12, '5xl' => 13,
+            'freesize' => 99
+        ];
+        usort($sizes, function($a, $b) use ($order) {
+            $keyA = is_array($a) ? ($a['KichThuoc'] ?? '') : (is_object($a) ? ($a->KichThuoc ?? '') : (string)$a);
+            $keyB = is_array($b) ? ($b['KichThuoc'] ?? '') : (is_object($b) ? ($b->KichThuoc ?? '') : (string)$b);
+            $normA = strtolower(trim($keyA));
+            $normB = strtolower(trim($keyB));
+
+            $rankA = $order[$normA] ?? (is_numeric($normA) ? 20 + (int)$normA : 50);
+            $rankB = $order[$normB] ?? (is_numeric($normB) ? 20 + (int)$normB : 50);
+
+            if ($rankA === $rankB) {
+                return strcmp($keyA, $keyB);
+            }
+            return ($rankA < $rankB) ? -1 : 1;
+        });
+    }
+
+    // Lấy danh sách size duy nhất của sản phẩm kèm số lượng tồn (sắp xếp chuẩn thời trang)
     public function laykichthuoctheosanpham($id_sanpham) {
         $db = DATABASE::connect();
         try {
             $sql = "SELECT KichThuoc, SUM(SoLuong) as TongSoLuong 
                     FROM tbl_bienthe 
                     WHERE IdSanPham = :id 
-                    GROUP BY KichThuoc";
+                    GROUP BY KichThuoc
+                    ORDER BY 
+                        CASE UPPER(TRIM(KichThuoc))
+                            WHEN '3XS' THEN 1
+                            WHEN '2XS' THEN 2
+                            WHEN 'XS' THEN 3
+                            WHEN 'S' THEN 4
+                            WHEN 'M' THEN 5
+                            WHEN 'L' THEN 6
+                            WHEN 'XL' THEN 7
+                            WHEN '2XL' THEN 8
+                            WHEN 'XXL' THEN 9
+                            WHEN '3XL' THEN 10
+                            WHEN 'XXXL' THEN 11
+                            WHEN '4XL' THEN 12
+                            WHEN '5XL' THEN 13
+                            WHEN 'FREESIZE' THEN 99
+                            ELSE 50
+                        END,
+                        CAST(KichThuoc AS UNSIGNED) ASC,
+                        KichThuoc ASC";
             $cmd = $db->prepare($sql);
             $cmd->bindValue(":id", (int)$id_sanpham, PDO::PARAM_INT);
             $cmd->execute();
-            return $cmd->fetchAll();
+            $res = $cmd->fetchAll();
+            self::sapxepkichthuoc($res);
+            return $res;
         } catch (PDOException $e) {
             return [];
         }

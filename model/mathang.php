@@ -65,7 +65,7 @@ class MATHANG {
 
     // Hàm hỗ trợ phân tích từ khóa tìm kiếm thông minh
     private function buildSearchClauses($gioitinh, $search) {
-        $conds = ["1=1"];
+        $conds = ["1=1", "COALESCE(sp.Khoa, 0) = 0", "(dm.Khoa IS NULL OR dm.Khoa = 0)"];
         $binds = [];
         $idx = 0;
 
@@ -357,6 +357,18 @@ class MATHANG {
             return $cmd->execute([':id' => $id]);
         } catch (PDOException $e) {
             echo "<p>Lỗi xóa mặt hàng: " . $e->getMessage() . "</p>";
+            return false;
+        }
+    }
+
+    // Đổi trạng thái Khóa / Mở sản phẩm
+    public function doitrangthai($id) {
+        $db = DATABASE::connect();
+        try {
+            $cmd = $db->prepare("UPDATE tbl_sanpham SET Khoa = 1 - COALESCE(Khoa, 0) WHERE IdSanPham = :id");
+            $cmd->bindValue(":id", (int)$id, PDO::PARAM_INT);
+            return $cmd->execute();
+        } catch (PDOException $e) {
             return false;
         }
     }

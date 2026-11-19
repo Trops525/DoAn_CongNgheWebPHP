@@ -68,7 +68,20 @@ switch ($action) {
         include 'main.php';
         break;
 
+    case 'khoa':
+        $id = (int)($_REQUEST['id'] ?? 0);
+        if ($id > 0) {
+            $dm->doitrangthai($id);
+        }
+        $referer = $_SERVER['HTTP_REFERER'] ?? $currentScript;
+        header('Location: ' . $referer);
+        exit;
+
     case 'xoa':
+        if (($_SESSION['user_role'] ?? 2) != 1) {
+            echo "<script>alert('Chỉ Quản trị viên mới có quyền xóa danh mục vĩnh viễn!'); window.location.href='" . $currentScript . "';</script>";
+            exit;
+        }
         $id = (int)($_REQUEST['id'] ?? 0);
         if ($id > 0) {
             $dm->xoadanhmuc($id);

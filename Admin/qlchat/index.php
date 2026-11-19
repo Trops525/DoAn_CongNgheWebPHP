@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../model/database.php';
 require_once __DIR__ . '/../../model/cskh.php';
 require_once __DIR__ . '/../../model/nguoidung.php';
 
-if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 3])) {
+if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 4])) {
     header('Location: /Thoi-Trang-Quality/TrangTin/dangnhap.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }

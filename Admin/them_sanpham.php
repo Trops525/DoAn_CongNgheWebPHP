@@ -6,7 +6,7 @@ if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 3]
     header('Location: /Thoi-Trang-Quality/TrangTin/dangnhap.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
-require_once 'db.php'; 
+require_once __DIR__ . '/db.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // 1. LƯU SẢN PHẨM CHÍNH
@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm sản phẩm mới - Quality Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; padding: 30px 15px; margin: 0; color: #333; }
@@ -205,8 +206,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div id="variant-container">
             <div class="variant-row">
                 <div class="col"><label>Màu sắc *:</label><input type="text" name="mau_sac[]" placeholder="VD: Đen" required></div>
-                <div class="col"><label>Kích thước *:</label><input type="text" name="kich_thuoc[]" placeholder="VD: L" required></div>
-                <div class="col"><label>Số lượng tồn *:</label><input type="number" name="so_luong[]" value="10" required></div>
+                <div class="col">
+                    <label>Kích thước (Size) *:</label>
+                    <select name="kich_thuoc[]" required>
+                        <option value="S">Size S</option>
+                        <option value="M" selected>Size M</option>
+                        <option value="L">Size L</option>
+                        <option value="XL">Size XL</option>
+                        <option value="XXL">Size XXL</option>
+                        <option value="3XL">Size 3XL</option>
+                        <option value="Freesize">Freesize</option>
+                    </select>
+                </div>
+                <div class="col"><label>Số lượng tồn *:</label><input type="number" name="so_luong[]" value="10" min="0" required></div>
                 <button type="button" class="btn-remove" style="visibility: hidden;" tabindex="-1">Xóa</button>
             </div>
         </div>
@@ -222,18 +234,68 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <script>
+const SIZES = [
+    { val: 'S', label: 'Size S' },
+    { val: 'M', label: 'Size M' },
+    { val: 'L', label: 'Size L' },
+    { val: 'XL', label: 'Size XL' },
+    { val: 'XXL', label: 'Size XXL' },
+    { val: '3XL', label: 'Size 3XL' },
+    { val: 'Freesize', label: 'Freesize' }
+];
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderSizeOptions(selectedVal) {
+    return SIZES.map(s => `<option value="${s.val}" ${s.val === selectedVal ? 'selected' : ''}>${s.label}</option>`).join('');
+}
+
 function addVariant() {
     const container = document.getElementById('variant-container');
+    // Lấy màu từ dòng đầu tiên để tự động điền xuống các dòng sau
+    const firstColorInput = document.querySelector('input[name="mau_sac[]"]');
+    const currentColor = firstColorInput ? firstColorInput.value : '';
+
+    // Tìm size kế tiếp chưa chọn để gợi ý thông minh (VD: đã có M thì tiếp theo gợi ý L)
+    const usedSizes = Array.from(container.querySelectorAll('select[name="kich_thuoc[]"]')).map(s => s.value);
+    const nextSizeObj = SIZES.find(s => !usedSizes.includes(s.val));
+    const nextSize = nextSizeObj ? nextSizeObj.val : 'L';
+
     const newRow = document.createElement('div');
     newRow.className = 'variant-row';
     newRow.innerHTML = `
-        <div class="col"><label>Màu sắc *:</label><input type="text" name="mau_sac[]" placeholder="VD: Trắng" required></div>
-        <div class="col"><label>Kích thước *:</label><input type="text" name="kich_thuoc[]" placeholder="VD: XL" required></div>
-        <div class="col"><label>Số lượng tồn *:</label><input type="number" name="so_luong[]" value="10" required></div>
+        <div class="col"><label>Màu sắc *:</label><input type="text" name="mau_sac[]" value="${escapeHtml(currentColor)}" placeholder="VD: Đen" required></div>
+        <div class="col">
+            <label>Kích thước (Size) *:</label>
+            <select name="kich_thuoc[]" required>
+                ${renderSizeOptions(nextSize)}
+            </select>
+        </div>
+        <div class="col"><label>Số lượng tồn *:</label><input type="number" name="so_luong[]" value="10" min="0" required></div>
         <button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Xóa dòng này"><i class="fa fa-trash"></i></button>
     `;
     container.appendChild(newRow);
 }
+
+// Tự động đồng bộ màu từ dòng đầu tiên xuống các dòng khác khi gõ thay đổi
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('variant-container');
+    if (!container) return;
+    container.addEventListener('input', function(e) {
+        if (e.target && e.target.name === 'mau_sac[]') {
+            const allColorInputs = container.querySelectorAll('input[name="mau_sac[]"]');
+            if (e.target === allColorInputs[0]) {
+                const newColor = e.target.value;
+                for (let i = 1; i < allColorInputs.length; i++) {
+                    allColorInputs[i].value = newColor;
+                }
+            }
+        }
+    });
+});
 </script>
 
 </body>

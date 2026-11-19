@@ -21,4 +21,6 @@ $ket_noi->set_charset("utf8");
 
 // Đảm bảo trường ghi nhận người xác nhận giao hàng tồn tại
 @$ket_noi->query("ALTER TABLE tbl_donhang ADD COLUMN IF NOT EXISTS IdNhanVienTao int(10) NULL");
+@$ket_noi->query("ALTER TABLE tbl_sanpham ADD COLUMN IF NOT EXISTS Khoa tinyint(1) NOT NULL DEFAULT 0");
+@$ket_noi->query("ALTER TABLE tbl_danhmuc ADD COLUMN IF NOT EXISTS Khoa tinyint(1) NOT NULL DEFAULT 0");
 ?>

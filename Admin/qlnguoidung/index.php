@@ -55,6 +55,8 @@ switch ($action) {
         $quyen = (int)($_POST['quyenhan'] ?? 2);
         if ($id > 0) {
             $nd->phanquyen($id, $quyen);
+            echo "<script>alert('Cập nhật quyền hạn cho tài khoản thành công!'); window.location.href='" . $currentScript . "';</script>";
+            exit;
         }
         header('Location: ' . $currentScript);
         exit;

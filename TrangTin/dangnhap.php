@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_phone'] = $user['DienThoai'];
 
                 $next = trim($_POST['next'] ?? $_GET['next'] ?? 'index.php');
-                if ($user['QuyenHan'] == 1 || $user['QuyenHan'] == 3) {
+                if (in_array($user['QuyenHan'], [1, 3, 4, 5])) {
                     if (!empty($next) && $next !== 'index.php') {
                         header('Location: ' . $next);
                     } else {

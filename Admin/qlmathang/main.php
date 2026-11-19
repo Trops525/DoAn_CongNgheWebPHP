@@ -32,8 +32,26 @@ $where_clauses = [];
 $binds = [];
 
 if (!empty($search)) {
-    $where_clauses[] = "(sp.TenSanPham LIKE :s OR sp.MaSanPham LIKE :s)";
-    $binds[':s'] = "%$search%";
+    $search_lower = mb_strtolower($search, 'UTF-8');
+    if ($search_lower === 'ao' || $search_lower === 'áo') {
+        // Tìm riêng các sản phẩm Áo (tránh dính đuôi "thao" trong "thể thao" của mũ/quần do bảng mã MySQL không phân biệt dấu)
+        $where_clauses[] = "(LOWER(CONVERT(sp.TenSanPham USING utf8mb4)) COLLATE utf8mb4_bin LIKE :s_bin OR sp.TenSanPham LIKE 'Áo %' OR dm.TenDanhMuc LIKE '%Áo%')";
+        $binds[':s_bin'] = "%áo%";
+    } elseif ($search_lower === 'quan' || $search_lower === 'quần') {
+        // Tìm riêng các sản phẩm Quần
+        $where_clauses[] = "(LOWER(CONVERT(sp.TenSanPham USING utf8mb4)) COLLATE utf8mb4_bin LIKE :s_bin OR sp.TenSanPham LIKE 'Quần %' OR dm.TenDanhMuc LIKE '%Quần%')";
+        $binds[':s_bin'] = "%quần%";
+    } else {
+        $has_accent = (bool)preg_match('/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/ui', $search);
+        if ($has_accent) {
+            $where_clauses[] = "(LOWER(CONVERT(sp.TenSanPham USING utf8mb4)) COLLATE utf8mb4_bin LIKE :s_bin OR sp.MaSanPham LIKE :s)";
+            $binds[':s_bin'] = "%" . $search_lower . "%";
+            $binds[':s'] = "%$search%";
+        } else {
+            $where_clauses[] = "(sp.TenSanPham LIKE :s OR sp.MaSanPham LIKE :s)";
+            $binds[':s'] = "%$search%";
+        }
+    }
 }
 
 if ($category > 0) {
@@ -42,7 +60,11 @@ if ($category > 0) {
 }
 
 if ($status !== 'all') {
-    if ($status === 'sold_out') {
+    if ($status === 'active') {
+        $where_clauses[] = "COALESCE(sp.Khoa, 0) = 0";
+    } elseif ($status === 'locked') {
+        $where_clauses[] = "sp.Khoa = 1";
+    } elseif ($status === 'sold_out') {
         $where_clauses[] = "COALESCE((SELECT SUM(SoLuong) FROM tbl_bienthe WHERE IdSanPham = sp.IdSanPham), 0) = 0";
     } elseif ($status === 'sold') {
         $where_clauses[] = "sp.LuotMua > 0";
@@ -61,7 +83,7 @@ if ($sort == 'price_asc') {
 }
 
 // Tổng số sản phẩm
-$count_cmd = $db->prepare("SELECT COUNT(*) as total FROM tbl_sanpham sp $where_sql");
+$count_cmd = $db->prepare("SELECT COUNT(*) as total FROM tbl_sanpham sp LEFT JOIN tbl_danhmuc dm ON sp.IdDanhMuc = dm.IdDanhMuc $where_sql");
 foreach ($binds as $k => $v) { $count_cmd->bindValue($k, $v); }
 $count_cmd->execute();
 $total_items = (int)($count_cmd->fetch()['total'] ?? 0);
@@ -81,7 +103,9 @@ $categories = $dm->laydanhmuc();
 
 <div class="header-page">
     <h1>Danh sách sản phẩm thời trang</h1>
-    <a href="../them_sanpham.php" class="btn btn-add"><i class="fa fa-plus"></i> Thêm sản phẩm mới</a>
+    <?php if (in_array($userRole, [1, 3])): ?>
+    <a href="/Thoi-Trang-Quality/Admin/them_sanpham.php" class="btn btn-add"><i class="fa fa-plus"></i> Thêm sản phẩm mới</a>
+    <?php endif; ?>
 </div>
 
 <!-- THANH CÔNG CỤ TÌM KIẾM & LỌC -->
@@ -104,10 +128,12 @@ $categories = $dm->laydanhmuc();
             </select>
         </div>
 
-        <div style="flex: 1; min-width: 130px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 5px; font-size: 13px;">📊 Trạng thái tồn</label>
+        <div style="flex: 1; min-width: 140px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 5px; font-size: 13px;">📊 Trạng thái</label>
             <select name="status" style="width: 100%; padding: 9px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
                 <option value="all" <?= ($status == 'all') ? 'selected' : '' ?>>-- Tất cả --</option>
+                <option value="active" <?= ($status == 'active') ? 'selected' : '' ?>>Đang mở bán</option>
+                <option value="locked" <?= ($status == 'locked') ? 'selected' : '' ?>>Đã khóa</option>
                 <option value="sold_out" <?= ($status == 'sold_out') ? 'selected' : '' ?>>Bán hết</option>
                 <option value="sold" <?= ($status == 'sold') ? 'selected' : '' ?>>Đã bán</option>
                 <option value="unsold" <?= ($status == 'unsold') ? 'selected' : '' ?>>Chưa bán</option>
@@ -127,14 +153,15 @@ $categories = $dm->laydanhmuc();
             <button type="submit" style="background: #3498db; color: white; padding: 9px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; white-space: nowrap;">
                 <i class="fa fa-filter"></i> Lọc
             </button>
-            <a href="index.php" style="background: #95a5a6; color: white; padding: 9px 16px; border-radius: 5px; text-decoration: none; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center;">
+            <a href="?" style="background: #95a5a6; color: white; padding: 9px 16px; border-radius: 5px; text-decoration: none; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center;">
                 <i class="fa fa-redo"></i> Đặt lại
             </a>
         </div>
     </form>
 </div>
 
-<!-- NÚT THAO TÁC HÀNG LOẠT -->
+<!-- NÚT THAO TÁC HÀNG LOẠT (CHỈ QUẢN TRỊ VIÊN) -->
+<?php if ($userRole == 1): ?>
 <div id="bulk-actions" style="margin-bottom: 15px; display: none;">
     <form method="POST" style="display: flex; gap: 10px;">
         <input type="hidden" name="action" value="delete_selected">
@@ -146,6 +173,7 @@ $categories = $dm->laydanhmuc();
         </button>
     </form>
 </div>
+<?php endif; ?>
 
 <div class="table-container">
     <form id="products-form">
@@ -180,12 +208,21 @@ $categories = $dm->laydanhmuc();
                             $size_html = '<span style="color: #e74c3c;">Chưa có size</span>';
                         }
                     ?>
-                        <tr>
+                    <?php 
+                        $isLocked = !empty($row['Khoa']);
+                    ?>
+                        <tr style="<?= $isLocked ? 'background: #fff5f5; opacity: 0.88;' : '' ?>">
                             <td style="text-align: center;"><input type="checkbox" name="selected_ids[]" value="<?= $row['IdSanPham'] ?>" onchange="updateBulkActions()"></td>
                             <td><?= $row['IdSanPham'] ?></td>
                             <td><img src="/Thoi-Trang-Quality/TrangTin/<?= $link_anh ?>" class="img-product"></td>
                             <td>
-                                <strong><?= htmlspecialchars($row['TenSanPham']) ?></strong><br>
+                                <strong><?= htmlspecialchars($row['TenSanPham']) ?></strong>
+                                <?php if ($isLocked): ?>
+                                    <span style="font-size: 11px; background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: normal; display: inline-block;">
+                                        <i class="fa fa-lock"></i> Đã khóa
+                                    </span>
+                                <?php endif; ?>
+                                <br>
                                 <small style="color:#888;">Mã: <?= htmlspecialchars($row['MaSanPham']) ?> | DM: <?= htmlspecialchars($row['TenDanhMuc'] ?? '') ?></small>
                             </td>
                             <td><?= number_format($row['DonGia'], 0, ',', '.') ?>đ</td>
@@ -193,8 +230,20 @@ $categories = $dm->laydanhmuc();
                             <td><?= $row['LuotMua'] ?></td>
                             <td style="padding: 10px; font-size: 12px;"><?= $size_html ?></td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <a href="../SuaSanPham.php?id=<?= $row['IdSanPham'] ?>" class="btn btn-edit"><i class="fa fa-edit"></i> Sửa</a>
-                                <a href="index.php?action=xoa&id=<?= $row['IdSanPham'] ?>" class="btn btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');"><i class="fa fa-trash"></i> Xóa</a>
+                                <?php if ($userRole == 1): ?>
+                                    <a href="/Thoi-Trang-Quality/Admin/SuaSanPham.php?id=<?= $row['IdSanPham'] ?>" class="btn btn-edit"><i class="fa fa-edit"></i> Sửa</a>
+                                    <a href="?action=khoa&id=<?= $row['IdSanPham'] ?>" class="btn" style="background: <?= $isLocked ? '#28a745' : '#ffc107' ?>; color: <?= $isLocked ? '#fff' : '#000' ?>; padding: 6px 9px;" onclick="return confirm('<?= $isLocked ? 'Mở khóa bán sản phẩm này?' : 'Khóa (tạm dừng kinh doanh / ẩn) sản phẩm này?' ?>');" title="<?= $isLocked ? 'Mở khóa bán' : 'Khóa sản phẩm' ?>">
+                                        <?= $isLocked ? '<i class="fa fa-unlock"></i> Mở' : '<i class="fa fa-lock"></i> Khóa' ?>
+                                    </a>
+                                    <a href="?action=xoa&id=<?= $row['IdSanPham'] ?>" class="btn btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');"><i class="fa fa-trash"></i> Xóa</a>
+                                <?php elseif ($userRole == 3): ?>
+                                    <a href="/Thoi-Trang-Quality/Admin/SuaSanPham.php?id=<?= $row['IdSanPham'] ?>" class="btn btn-edit"><i class="fa fa-edit"></i> Sửa kho</a>
+                                    <a href="?action=khoa&id=<?= $row['IdSanPham'] ?>" class="btn" style="background: <?= $isLocked ? '#28a745' : '#ffc107' ?>; color: <?= $isLocked ? '#fff' : '#000' ?>; padding: 6px 9px;" onclick="return confirm('<?= $isLocked ? 'Mở khóa bán sản phẩm này?' : 'Khóa (tạm dừng kinh doanh / ẩn) sản phẩm này?' ?>');" title="<?= $isLocked ? 'Mở khóa bán' : 'Khóa sản phẩm' ?>">
+                                        <?= $isLocked ? '<i class="fa fa-unlock"></i> Mở' : '<i class="fa fa-lock"></i> Khóa' ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span style="font-size: 12px; color: #6c757d; font-style: italic;"><i class="fa fa-eye"></i> Chỉ xem</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

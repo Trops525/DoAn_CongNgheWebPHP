@@ -9,6 +9,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quality - Fashion Store</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap 5.3 Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <!-- Quality Fashion Custom Styles -->
     <link rel="stylesheet" href="assets/style.css?v=<?= @filemtime(__DIR__ . '/assets/style.css') ?: time() ?>">
     <script defer src="assets/script.js?v=<?= @filemtime(__DIR__ . '/assets/script.js') ?: time() ?>"></script>
     <style>
@@ -196,7 +199,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="index.php" class="<?= ($current_page == 'index.php') ? 'active-link' : '' ?>">Trang chủ</a>
             <a href="sanpham.php" class="<?= ($current_page == 'sanpham.php') ? 'active-link' : '' ?>">Sản phẩm</a>
             <a href="cskh.php" class="<?= ($current_page == 'cskh.php') ? 'active-link' : '' ?>">CSKH</a>
-            <?php if (!empty($_SESSION['user_role']) && in_array($_SESSION['user_role'], [1, 3])): ?>
+            <?php if (!empty($_SESSION['user_role']) && in_array($_SESSION['user_role'], [1, 3, 4, 5])): ?>
                 <a href="../Admin/index.php" class="admin-btn">Quản lý</a>
             <?php endif; ?>
         </nav>

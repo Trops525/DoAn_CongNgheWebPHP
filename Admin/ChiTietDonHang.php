@@ -4,8 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once 'db.php';
 
-// Kiểm tra quyền Admin hoặc Nhân viên
-if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 3])) {
+// Kiểm tra quyền Admin hoặc Nhân viên chuyên trách
+if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 3, 4, 5])) {
     header('Location: ../TrangTin/dangnhap.php?next=../Admin/QuanLyDonHang.php');
     exit;
 }
@@ -46,6 +46,7 @@ $resItems = $ket_noi->query($sqlItems);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết đơn hàng #<?= $orderId ?> - Quality Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/admin.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -69,12 +70,16 @@ $resItems = $ket_noi->query($sqlItems);
 <div class="sidebar">
     <h2>QUALITY ADMIN</h2>
     <a href="index.php"><i class="fa fa-box"></i> Quản lý sản phẩm</a>
-    <?php if (($_SESSION['user_role'] ?? 2) == 1): ?>
+    <?php if (in_array(($_SESSION['user_role'] ?? 2), [1, 5])): ?>
     <a href="thongke.php"><i class="fa fa-chart-line"></i> Thống kê doanh thu</a>
     <?php endif; ?>
+    <?php if (in_array(($_SESSION['user_role'] ?? 2), [1, 3])): ?>
     <a href="QuanLyDanhMuc.php"><i class="fa fa-list"></i> Quản lý danh mục</a>
+    <?php endif; ?>
     <a href="QuanLyDonHang.php" class="active"><i class="fa fa-shopping-cart"></i> Quản lý đơn hàng</a>
+    <?php if (in_array(($_SESSION['user_role'] ?? 2), [1, 4])): ?>
     <a href="QuanLyChat.php"><i class="fa fa-comments"></i> Quản lý Chat</a>
+    <?php endif; ?>
     <?php if (($_SESSION['user_role'] ?? 2) == 1): ?>
     <a href="QuanLyNguoiDung.php"><i class="fa fa-users"></i> Quản lý người dùng</a>
     <?php endif; ?>

@@ -347,8 +347,10 @@ if (isset($_SESSION['user_id'])) {
                     $g_ban = $r['DonGia'] - ($r['DonGia'] * $r['TiLeGiamGia'] / 100);
             ?>
                 <div class="product-item">
-                    <a href="chitiet.php?id=<?= $r['IdSanPham'] ?>">
-                        <img src="<?= htmlspecialchars($r['HinhAnh']) ?>" alt="<?= htmlspecialchars($r['TenSanPham']) ?>">
+                    <a href="chitiet.php?id=<?= $r['IdSanPham'] ?>" class="product-link">
+                        <div class="product-thumb">
+                            <img src="<?= htmlspecialchars($r['HinhAnh']) ?>" alt="<?= htmlspecialchars($r['TenSanPham']) ?>">
+                        </div>
                         <div class="product-title"><?= htmlspecialchars($r['TenSanPham']) ?></div>
                         <div class="product-price"><?= number_format($g_ban, 0, ',', '.') ?>đ</div>
                     </a>

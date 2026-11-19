@@ -6,7 +6,7 @@ if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 3]
     header('Location: /Thoi-Trang-Quality/TrangTin/dangnhap.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
-require_once 'db.php';
+require_once __DIR__ . '/db.php';
 
 // 1. LẤY DỮ LIỆU CŨ ĐỂ HIỂN THỊ LÊN FORM
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -66,19 +66,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                    WHERE IdSanPham = $id";
 
     if ($ket_noi->query($sql_update)) {
-        // Cập nhật số lượng size nếu có dữ liệu POST
+        // Cập nhật số lượng size nếu có dữ liệu POST (cho phép cả số 0 khi hết hàng)
         if (isset($_POST['quantities']) && is_array($_POST['quantities'])) {
             foreach ($_POST['quantities'] as $kichThuoc => $soLuong) {
-                $soLuong = (int)$soLuong;
+                $soLuong = max(0, (int)$soLuong);
                 $kichThuoc = $ket_noi->real_escape_string($kichThuoc);
-                if ($soLuong > 0) {
-                    $sql_update_size = "UPDATE tbl_bienthe SET SoLuong = $soLuong 
-                                       WHERE IdSanPham = $id AND KichThuoc = '$kichThuoc'";
-                    $ket_noi->query($sql_update_size);
-                }
+                $sql_update_size = "UPDATE tbl_bienthe SET SoLuong = $soLuong 
+                                   WHERE IdSanPham = $id AND KichThuoc = '$kichThuoc'";
+                $ket_noi->query($sql_update_size);
             }
         }
+
+        // Bổ sung size mới nếu được chọn
+        if (!empty($_POST['new_size']) && isset($_POST['new_qty']) && $_POST['new_qty'] !== '') {
+            $newSize = $ket_noi->real_escape_string(trim($_POST['new_size']));
+            $newQty = max(0, (int)$_POST['new_qty']);
+            $chk = $ket_noi->query("SELECT IdBienThe FROM tbl_bienthe WHERE IdSanPham = $id AND KichThuoc = '$newSize'");
+            if ($chk && $chk->num_rows > 0) {
+                $ket_noi->query("UPDATE tbl_bienthe SET SoLuong = $newQty WHERE IdSanPham = $id AND KichThuoc = '$newSize'");
+            } else {
+                $ket_noi->query("INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong) VALUES ($id, 'Mặc định', '$newSize', $newQty)");
+            }
+        }
+
         echo "<script>alert('Đã lưu các thay đổi thành công!'); window.location.href='index.php';</script>";
+        exit;
     } else {
         echo "Lỗi truy vấn: " . $ket_noi->error;
     }
@@ -92,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sửa sản phẩm - Admin Quality</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; padding: 30px 15px; margin: 0; color: #333; }
@@ -182,13 +195,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <textarea name="mo_ta" rows="4"><?= $sp['MoTa'] ?></textarea>
         </div>
 
-        <div class="form-group" style="background: #f0f8ff; padding: 15px; border-radius: 6px; border: 1px solid #b3d9ff;">
-            <label style="font-weight: bold; font-size: 15px; color: #0056b3;">Size & Số Lượng:</label>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <div class="form-group" style="background: #f0f8ff; padding: 20px; border-radius: 8px; border: 1px solid #b3d9ff;">
+            <label style="font-weight: bold; font-size: 15px; color: #0056b3; margin-bottom: 12px; display: block;">
+                <i class="fa fa-boxes"></i> Quản lý Size & Số Lượng Tồn Kho:
+            </label>
+            <table class="table table-bordered table-hover" style="background: #fff; width: 100%; margin-top: 10px;">
                 <thead>
-                    <tr style="background: #e7f3ff; border-bottom: 2px solid #0056b3;">
-                        <th style="padding: 10px; text-align: left; color: #0056b3;">Size</th>
-                        <th style="padding: 10px; text-align: center; color: #0056b3;">Số Lượng</th>
+                    <tr style="background: #e7f3ff;">
+                        <th style="padding: 10px; text-align: left; color: #0056b3; width: 50%;">Kích cỡ (Size)</th>
+                        <th style="padding: 10px; text-align: center; color: #0056b3; width: 50%;">Số Lượng Tồn Kho</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -199,11 +214,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($result_sizes && $result_sizes->num_rows > 0) {
                         while ($size_row = $result_sizes->fetch_assoc()) {
                             $size = htmlspecialchars($size_row['KichThuoc']);
-                            $qty = $size_row['SoLuong'];
-                            echo '<tr style="border-bottom: 1px solid #ddd;">';
-                            echo '<td style="padding: 12px;">' . $size . '</td>';
-                            echo '<td style="padding: 12px; text-align: center;">';
-                            echo '<input type="number" name="quantities[' . $size . ']" value="' . $qty . '" min="0" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">';
+                            $qty = (int)$size_row['SoLuong'];
+                            echo '<tr>';
+                            echo '<td style="padding: 10px 14px; font-weight: 600; vertical-align: middle;">' . $size . '</td>';
+                            echo '<td style="padding: 10px 14px; text-align: center;">';
+                            echo '<input type="number" name="quantities[' . $size . ']" value="' . $qty . '" min="0" class="form-control" style="width: 110px; margin: 0 auto; text-align: center; font-weight: bold;">';
                             echo '</td>';
                             echo '</tr>';
                         }
@@ -213,10 +228,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     ?>
                 </tbody>
             </table>
+
+            <!-- Bổ sung size mới -->
+            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed #b3d9ff; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="font-size: 12px; font-weight: 600; margin-bottom: 4px; display: block; color: #0056b3;">+ Bổ sung Size mới:</label>
+                    <select name="new_size" class="form-select" style="padding: 8px 12px; font-size: 13px;">
+                        <option value="">-- Chọn Size để thêm --</option>
+                        <option value="S">Size S</option>
+                        <option value="M">Size M</option>
+                        <option value="L">Size L</option>
+                        <option value="XL">Size XL</option>
+                        <option value="XXL">Size XXL</option>
+                        <option value="3XL">Size 3XL</option>
+                        <option value="Freesize">Freesize</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                    <label style="font-size: 12px; font-weight: 600; margin-bottom: 4px; display: block; color: #0056b3;">Số lượng nhập:</label>
+                    <input type="number" name="new_qty" min="0" placeholder="0" class="form-control" style="padding: 8px 12px; font-size: 13px;">
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn-submit">CẬP NHẬT THAY ĐỔI</button>
-        <a href="index.php" class="btn-back">← Hủy và quay lại danh sách</a>
+        <a href="index.php" class="btn-back" style="display: block; text-align: center; margin-top: 15px;">← Hủy và quay lại danh sách</a>
     </form>
 </div>
 

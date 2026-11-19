@@ -73,16 +73,20 @@ $orders = $dh->laytatcadonhang($loc_status);
                             <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
                                 <a href="/Thoi-Trang-Quality/Admin/ChiTietDonHang.php?id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #17a2b8; color: #fff; padding: 5px 8px;">Xem</a>
                                 
-                                <?php if ($tt === 'Đang xử lý'): ?>
-                                    <a href="?action=xacnhan&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #28a745; color: #fff; padding: 5px 8px;" onclick="return confirm('Xác nhận duyệt giao và TRỪ KHO?')">Duyệt</a>
+                                <?php if (in_array($userRole, [1, 4])): ?>
+                                    <?php if ($tt === 'Đang xử lý'): ?>
+                                        <a href="?action=xacnhan&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #28a745; color: #fff; padding: 5px 8px;" onclick="return confirm('Xác nhận duyệt giao và TRỪ KHO?')">Duyệt</a>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($tt === 'Yêu cầu trả hàng'): ?>
+                                        <a href="?action=hoantra&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #ffc107; color: #000; padding: 5px 8px;" onclick="return confirm('Chấp nhận hoàn trả và CỘNG LẠI KHO?')">Hoàn kho</a>
+                                        <a href="?action=tuchoi&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #6c757d; color: #fff; padding: 5px 8px;" onclick="return confirm('Từ chối yêu cầu hoàn trả?')">Từ chối</a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                                 
-                                <?php if ($tt === 'Yêu cầu trả hàng'): ?>
-                                    <a href="?action=hoantra&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #ffc107; color: #000; padding: 5px 8px;" onclick="return confirm('Chấp nhận hoàn trả và CỘNG LẠI KHO?')">Hoàn kho</a>
-                                    <a href="?action=tuchoi&id=<?= $row['IdDonHang'] ?>" class="btn" style="background: #6c757d; color: #fff; padding: 5px 8px;" onclick="return confirm('Từ chối yêu cầu hoàn trả?')">Từ chối</a>
+                                <?php if ($userRole == 1): ?>
+                                    <a href="?action=xoa&id=<?= $row['IdDonHang'] ?>" class="btn btn-delete" style="padding: 5px 8px;" onclick="return confirm('Xóa vĩnh viễn đơn hàng này?');">Xóa</a>
                                 <?php endif; ?>
-                                
-                                <a href="?action=xoa&id=<?= $row['IdDonHang'] ?>" class="btn btn-delete" style="padding: 5px 8px;" onclick="return confirm('Xóa vĩnh viễn đơn hàng này?');">Xóa</a>
                             </div>
                         </td>
                     </tr>

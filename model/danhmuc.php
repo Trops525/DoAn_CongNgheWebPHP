@@ -79,6 +79,18 @@ class DANHMUC {
         }
     }
 
+    // Đổi trạng thái Khóa / Mở danh mục
+    public function doitrangthai($id) {
+        $db = DATABASE::connect();
+        try {
+            $cmd = $db->prepare("UPDATE tbl_danhmuc SET Khoa = 1 - COALESCE(Khoa, 0) WHERE IdDanhMuc = :id");
+            $cmd->bindValue(":id", (int)$id, PDO::PARAM_INT);
+            return $cmd->execute();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
     // Xóa danh mục
     public function xoadanhmuc($danhmuc) {
         $db = DATABASE::connect();

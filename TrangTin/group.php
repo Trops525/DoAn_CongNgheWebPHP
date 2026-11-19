@@ -45,7 +45,9 @@ $danhmuc_all = $dm->laydanhmuc();
             ?>
             <div class="product-item">
                 <a href="chitiet.php?id=<?= $row['IdSanPham'] ?>" class="product-link">
-                    <img src="<?= htmlspecialchars($row['HinhAnh']) ?>" alt="<?= htmlspecialchars($row['TenSanPham']) ?>">
+                    <div class="product-thumb">
+                        <img src="<?= htmlspecialchars($row['HinhAnh']) ?>" alt="<?= htmlspecialchars($row['TenSanPham']) ?>">
+                    </div>
                     <div class="product-title"><?= htmlspecialchars($row['TenSanPham']) ?></div>
                     <div class="product-price">
                         <?php if ($row['TiLeGiamGia'] > 0): ?>

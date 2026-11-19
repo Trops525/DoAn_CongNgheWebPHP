@@ -1,4 +1,4 @@
-﻿<footer class="main-footer" id="footer">
+<footer class="main-footer" id="footer">
     <div class="footer-grid">
         <div class="footer-item">
             <h3>QUALITY lắng nghe bạn!</h3>
@@ -41,5 +41,7 @@
         </div>
     </div>
 </footer>
+<!-- Bootstrap 5.3 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

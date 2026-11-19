@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../../model/database.php';
 require_once __DIR__ . '/../../model/donhang.php';
 
-if (empty($_SESSION['user_id']) || ($_SESSION['user_role'] ?? 2) != 1) {
+if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_role'] ?? 2, [1, 5])) {
     header('Location: /Thoi-Trang-Quality/TrangTin/dangnhap.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }

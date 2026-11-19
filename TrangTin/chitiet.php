@@ -17,7 +17,7 @@ if (!$sp) {
     exit;
 }
 
-// Tăng số lượt xem cho mặt hàng (BTTH04)
+// Tăng số lượt xem cho mặt hàng
 $mh->tangluotxem($id);
 
 $gia_goc = $sp['DonGia'];

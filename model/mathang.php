@@ -177,7 +177,7 @@ class MATHANG {
         }
     }
 
-    // Tăng lượt xem cho 1 mặt hàng (BTTH03 & BTTH04)
+    // Tăng lượt xem cho 1 mặt hàng
     public function tangluotxem($id) {
         $db = DATABASE::connect();
         try {
@@ -190,7 +190,7 @@ class MATHANG {
         }
     }
 
-    // Lấy mặt hàng nổi bật (theo lượt mua hoặc lượt xem cao nhất) - BTTH04
+    // Lấy mặt hàng nổi bật (theo lượt mua hoặc lượt xem cao nhất)
     public function laymathangnoibat($limit = 4) {
         $db = DATABASE::connect();
         try {
@@ -296,7 +296,7 @@ class MATHANG {
         }
     }
 
-    // Thêm mặt hàng mới (BTTH06)
+    // Thêm mặt hàng mới
     public function themmathang($data, $bienthe = []) {
         $db = DATABASE::connect();
         try {
@@ -336,7 +336,7 @@ class MATHANG {
         }
     }
 
-    // Cập nhật mặt hàng (BTTH06)
+    // Cập nhật mặt hàng
     public function suamathang($id, $data, $bienthe = null) {
         $db = DATABASE::connect();
         try {
@@ -392,7 +392,7 @@ class MATHANG {
         }
     }
 
-    // Xóa mặt hàng (BTTH06)
+    // Xóa mặt hàng
     public function xoamathang($id) {
         $db = DATABASE::connect();
         try {

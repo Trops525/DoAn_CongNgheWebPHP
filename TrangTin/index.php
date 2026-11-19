@@ -23,7 +23,7 @@ $dg = new DANHGIA();
 // Lấy danh mục dùng chung
 $danhmuc = $dm->laydanhmuc();
 
-// Xác định hành động (BTTH03 - BTTH08)
+// Xác định hành động
 $action = $_REQUEST['action'] ?? 'null';
 
 switch ($action) {
@@ -34,17 +34,17 @@ switch ($action) {
         break;
 
     case 'group':
-        // Xem mặt hàng theo nhóm danh mục (BTTH04)
+        // Xem mặt hàng theo nhóm danh mục
         include __DIR__ . '/group.php';
         break;
 
     case 'detail':
-        // Xem chi tiết mặt hàng (BTTH04)
+        // Xem chi tiết mặt hàng
         include __DIR__ . '/chitiet.php';
         break;
 
     case 'chovaogio':
-        // Cho hàng vào giỏ (BTTH08)
+        // Cho hàng vào giỏ
         $id = (int)($_REQUEST['id'] ?? 0);
         $soluong = (int)($_REQUEST['soluong'] ?? 1);
         $size = $_REQUEST['size'] ?? 'Freesize';
@@ -62,7 +62,7 @@ switch ($action) {
         exit;
 
     case 'buynow':
-        // Mua ngay (BTTH08)
+        // Mua ngay
         $id = (int)($_REQUEST['id'] ?? 0);
         $size = $_REQUEST['size'] ?? 'Freesize';
         if (!isLoggedIn()) {
@@ -80,13 +80,13 @@ switch ($action) {
 
     case 'cart':
     case 'xemgiohang':
-        // Xem giỏ hàng (BTTH08)
+        // Xem giỏ hàng
         include __DIR__ . '/cart.php';
         break;
 
     case 'checkout':
     case 'thanhtoan':
-        // Thanh toán (BTTH08)
+        // Thanh toán
         include __DIR__ . '/checkout.php';
         break;
 

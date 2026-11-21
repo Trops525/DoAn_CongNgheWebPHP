@@ -17,12 +17,12 @@ $selected_prices = isset($_GET['prices']) ? $_GET['prices'] : [];
 $offset = ($page - 1) * $items_per_page;
 
 // 2. XÂY DỰNG CÂU LỆNH SQL DỰA TRÊN BỘ LỌC
-$filters = [];
+$filters = ["COALESCE(sp.Khoa, 0) = 0"];
 $join_bienthe = false; // Biến kiểm tra xem có cần JOIN với bảng biến thể không
 
 if ($q !== '') {
     $safe_q = $ket_noi->real_escape_string($q);
-    $filters[] = "sp.TenSanPham LIKE '%{$safe_q}%'";
+    $filters[] = "(sp.TenSanPham LIKE '%{$safe_q}%' OR sp.MaSanPham LIKE '%{$safe_q}%')";
 }
 
 if (!empty($selected_cats)) {
@@ -211,7 +211,15 @@ $total_pages = ceil($total_products / $items_per_page);
     <main class="main-products">
         
         <div class="products-header">
-            <div class="result-count">Hiển thị <strong><?= min($items_per_page, $total_products - ($page - 1) * $items_per_page) ?></strong> / <?= $total_products ?> kết quả (Trang <?= $page ?> / <?= $total_pages ?>)</div>
+            <div>
+                <?php if ($q !== ''): ?>
+                    <div style="font-size: 15px; margin-bottom: 6px; color: #333;">
+                        Kết quả lọc theo từ khóa: <strong style="color: #d0021b;">"<?= htmlspecialchars($q) ?>"</strong>
+                        <a href="sanpham.php" style="margin-left: 10px; font-size: 12px; color: #666; text-decoration: underline;" title="Bỏ lọc tìm kiếm">(Bỏ lọc)</a>
+                    </div>
+                <?php endif; ?>
+                <div class="result-count">Hiển thị <strong><?= min($items_per_page, max(0, $total_products - ($page - 1) * $items_per_page)) ?></strong> / <?= $total_products ?> kết quả (Trang <?= $page ?> / <?= max(1, $total_pages) ?>)</div>
+            </div>
             <div class="sort-box">
                 <label style="font-weight: bold; font-size: 14px;">Phân loại:</label>
                 <select class="sort-select" onchange="document.getElementById('hiddenSort').value = this.value; document.getElementById('filterForm').submit();">

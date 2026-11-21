@@ -204,9 +204,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <?php endif; ?>
         </nav>
         <div class="header-right">
-            <form class="search-bar" method="get" action="index.php">
-                <input name="q" type="text" placeholder="Tìm kiếm sản phẩm..." aria-label="Tìm kiếm sản phẩm" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-                <button type="submit"><i class="fa fa-search"></i></button>
+            <form class="search-bar" method="get" action="sanpham.php" id="header-search-form" autocomplete="off">
+                <input name="q" id="header-search-input" type="text" placeholder="Tìm kiếm sản phẩm..." aria-label="Tìm kiếm sản phẩm" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" autocomplete="off">
+                <button type="submit" id="header-search-btn" aria-label="Tìm kiếm"><i class="fa fa-search"></i></button>
+                <div class="search-suggestions" id="search-suggestions" style="display: none;"></div>
             </form>
             <div class="icons">
                 <?php if (isLoggedIn()): ?>

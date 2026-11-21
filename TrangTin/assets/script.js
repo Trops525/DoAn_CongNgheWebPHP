@@ -7,15 +7,180 @@
  * Các hàm dùng chung cho toàn bộ trang
  */
 document.addEventListener('DOMContentLoaded', function () {
-    // Xử lý nút Tìm kiếm
-    var searchButton = document.querySelector('.search-bar button');
-    var searchInput = document.querySelector('.search-bar input');
+    // Xử lý tìm kiếm và gợi ý trực tiếp (Google Autocomplete Style)
+    var searchForm = document.getElementById('header-search-form') || document.querySelector('.search-bar');
+    var searchInput = document.getElementById('header-search-input') || document.querySelector('.search-bar input');
+    var searchButton = document.getElementById('header-search-btn') || document.querySelector('.search-bar button');
+    var suggestBox = document.getElementById('search-suggestions');
 
-    if (searchButton && searchInput) {
-        searchButton.addEventListener('click', function () {
-            var value = searchInput.value.trim();
-            if (value) {
-                // Tìm kiếm sẽ được xử lý bởi form action
+    if (searchInput && suggestBox) {
+        var debounceTimer = null;
+        var activeIndex = -1;
+        var currentItems = [];
+
+        function fetchSuggestions(query) {
+            var q = (query || '').trim();
+            if (!q) {
+                suggestBox.style.display = 'none';
+                suggestBox.innerHTML = '';
+                return;
+            }
+
+            var url = '/Thoi-Trang-Quality/TrangTin/api_suggest.php?q=' + encodeURIComponent(q);
+            fetch(url)
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function(data) {
+                    // Kiểm tra lại xem người dùng có xóa sạch ô tìm kiếm trong lúc đang fetch không
+                    if (!searchInput.value.trim()) {
+                        suggestBox.style.display = 'none';
+                        suggestBox.innerHTML = '';
+                        return;
+                    }
+                    renderSuggestions(data, q);
+                })
+                .catch(function(err) {
+                    console.error('Lỗi lấy gợi ý tìm kiếm:', err);
+                });
+        }
+
+        function renderSuggestions(data, query) {
+            activeIndex = -1;
+            currentItems = [];
+            var html = '';
+
+            var hasKeywords = data.keywords && data.keywords.length > 0;
+
+            if (!hasKeywords) {
+                suggestBox.innerHTML = '<div style="padding: 14px 16px; color: #888; font-size: 13.5px;">Không tìm thấy gợi ý phù hợp</div>';
+                suggestBox.style.display = 'block';
+                return;
+            }
+
+            data.keywords.forEach(function(item) {
+                var display = item.full_display || item.highlight || item.text;
+                html += '<div class="suggest-item" data-text="' + encodeURIComponent(item.text) + '">';
+                html += '  <i class="fa fa-search suggest-icon"></i>';
+                html += '  <div class="suggest-text">' + display + '</div>';
+                html += '</div>';
+            });
+
+            suggestBox.innerHTML = html;
+            suggestBox.style.display = 'block';
+
+            // Gắn sự kiện click cho các dòng từ khóa
+            var keywordNodes = suggestBox.querySelectorAll('.suggest-item');
+            keywordNodes.forEach(function(node) {
+                currentItems.push(node);
+                node.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var text = decodeURIComponent(node.getAttribute('data-text'));
+                    searchInput.value = text;
+                    suggestBox.style.display = 'none';
+                    if (searchForm) {
+                        searchForm.action = 'sanpham.php';
+                        searchForm.submit();
+                    } else {
+                        window.location.href = 'sanpham.php?q=' + encodeURIComponent(text);
+                    }
+                });
+            });
+        }
+
+        // 1. Khi nhấn hoặc focus vào ô tìm kiếm: chỉ hiện đề xuất nếu ĐÃ CÓ CHỮ trong ô
+        searchInput.addEventListener('focus', function() {
+            var val = this.value.trim();
+            if (val) {
+                fetchSuggestions(val);
+            } else {
+                suggestBox.style.display = 'none';
+            }
+        });
+
+        searchInput.addEventListener('click', function() {
+            var val = this.value.trim();
+            if (val) {
+                if (suggestBox.style.display === 'none' || suggestBox.innerHTML === '') {
+                    fetchSuggestions(val);
+                }
+            } else {
+                suggestBox.style.display = 'none';
+            }
+        });
+
+        // 2. Khi nhấn phím / gõ chữ -> mới bắt đầu hiện đề xuất lên
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            var q = this.value.trim();
+            if (!q) {
+                // Khi xóa hết chữ -> lập tức ẩn hộp đề xuất
+                suggestBox.style.display = 'none';
+                suggestBox.innerHTML = '';
+                return;
+            }
+            debounceTimer = setTimeout(function() {
+                fetchSuggestions(q);
+            }, 120);
+        });
+
+        // 3. Khi nhấn nút tìm kiếm 🔍
+        if (searchButton) {
+            searchButton.addEventListener('click', function(e) {
+                var val = searchInput.value.trim();
+                if (!val) {
+                    // Nếu ô tìm kiếm đang trống, chỉ focus vào ô nhập chữ, không hiện đề xuất
+                    e.preventDefault();
+                    searchInput.focus();
+                    suggestBox.style.display = 'none';
+                }
+            });
+        }
+
+        // 4. Điều hướng bằng phím mũi tên Lên / Xuống / Enter
+        searchInput.addEventListener('keydown', function(e) {
+            if (suggestBox.style.display === 'none' || currentItems.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex++;
+                if (activeIndex >= currentItems.length) activeIndex = 0;
+                updateActiveItem();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex--;
+                if (activeIndex < 0) activeIndex = currentItems.length - 1;
+                updateActiveItem();
+            } else if (e.key === 'Enter') {
+                if (activeIndex >= 0 && activeIndex < currentItems.length) {
+                    e.preventDefault();
+                    currentItems[activeIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                suggestBox.style.display = 'none';
+            }
+        });
+
+        function updateActiveItem() {
+            currentItems.forEach(function(item, idx) {
+                if (idx === activeIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ block: 'nearest' });
+                    if (item.classList.contains('suggest-item')) {
+                        var kw = decodeURIComponent(item.getAttribute('data-text'));
+                        if (kw) searchInput.value = kw;
+                    }
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // 5. Đóng đề xuất khi nhấn ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!searchForm.contains(e.target)) {
+                suggestBox.style.display = 'none';
             }
         });
     }

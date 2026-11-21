@@ -36,11 +36,205 @@ button { cursor: pointer; }
 
 .header-right { display: flex; align-items: center; gap: 18px; }
 
-.search-bar { border: 1px solid #ddd; border-radius: 30px; display: flex; align-items: center; padding: 8px 14px; background: #f5f5f5; }
+.search-bar { 
+    position: relative;
+    border: 1px solid #ddd; 
+    border-radius: 30px; 
+    display: flex; 
+    align-items: center; 
+    padding: 8px 14px; 
+    background: #f5f5f5; 
+    transition: all 0.25s ease;
+}
 
-.search-bar input { border: none; background: transparent; outline: none; width: 180px; font-size: 13px; }
+.search-bar:focus-within {
+    border-color: #111;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
 
-.search-bar button { border: none; background: transparent; color: #333; font-size: 16px; padding: 0; }
+.search-bar input { 
+    border: none; 
+    background: transparent; 
+    outline: none; 
+    width: 180px; 
+    font-size: 13.5px; 
+    color: #222;
+    transition: width 0.25s ease;
+}
+
+.search-bar input:focus {
+    width: 220px;
+}
+
+.search-bar button { 
+    border: none; 
+    background: transparent; 
+    color: #444; 
+    font-size: 15px; 
+    padding: 0 0 0 6px; 
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.search-bar button:hover {
+    color: #000;
+}
+
+/* ==================================================
+   GOOGLE-STYLE LIVE SEARCH SUGGESTIONS DROPDOWN
+================================================== */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    z-index: 99999;
+    overflow: hidden;
+    padding: 6px 0;
+    font-family: inherit;
+    text-align: left;
+    animation: searchDropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes searchDropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggest-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+    padding: 10px 16px 4px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+    cursor: pointer;
+    color: #212529;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.suggest-item:hover,
+.suggest-item.active {
+    background: #f1f3f4;
+    color: #000;
+}
+
+.suggest-icon {
+    color: #80868b;
+    font-size: 13px;
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.suggest-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.suggest-text strong {
+    font-weight: 700;
+    color: #000;
+}
+
+.search-provider {
+    color: #70757a;
+    font-size: 13px;
+    font-weight: normal;
+    margin-left: 4px;
+}
+
+.suggest-product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    border-top: 1px solid #f8f9fa;
+    transition: background 0.15s ease;
+}
+
+.suggest-product-item:hover,
+.suggest-product-item.active {
+    background: #f8fafc;
+}
+
+.suggest-product-img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.suggest-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.suggest-product-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.suggest-product-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: #d0021b;
+}
+
+.suggest-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #f9fafb;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    border-top: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+
+.suggest-footer:hover {
+    background: #000;
+    color: #fff;
+}
 
 .icons { display: flex; align-items: center; gap: 14px; }
 

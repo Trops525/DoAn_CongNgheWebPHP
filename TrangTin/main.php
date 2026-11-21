@@ -24,16 +24,16 @@ $gender_param = $gender !== '' ? '&gender=' . urlencode($gender) : '';
 <!-- BANNER SLIDER -->
 <section class="shop-intro-banner">
     <div class="slider-container">
-        <div class="slide fade">
+        <div class="slide active">
             <img src="images/shop-sale-intro.jpg" alt="Quality Fashion Banner 1">
         </div>
-        <div class="slide fade">
+        <div class="slide">
             <img src="images/banner2.jpg" alt="Quality Fashion Banner 2">
         </div>
-        <div class="slide fade">
+        <div class="slide">
             <img src="images/banner3.jpg" alt="Quality Fashion Banner 3">
         </div>
-        <div class="slide fade">
+        <div class="slide">
             <img src="images/banner4.jpg" alt="Quality Fashion Banner 4">
         </div>
         <div class="slider-arrow prev-arrow"><i class="fa fa-chevron-left"></i></div>

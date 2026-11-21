@@ -302,8 +302,9 @@ document.addEventListener('DOMContentLoaded', function() {
  * Xử lý tự động chuyển ảnh banner mỗi 4 giây
  */
 document.addEventListener('DOMContentLoaded', function () {
-    let slideIndex = 0;
+    let slideIndex = 1;
     const slides = document.querySelectorAll('.slide');
+    const sliderContainer = document.querySelector('.slider-container');
     const prevButton = document.querySelector('.prev-arrow');
     const nextButton = document.querySelector('.next-arrow');
     let slideTimer = null;
@@ -311,10 +312,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Chỉ chạy logic nếu trang web hiện tại có banner
     if (slides.length > 0) {
         function showSlides(index) {
-            slides.forEach(slide => {
-                slide.style.display = 'none';
-            });
-
             if (index > slides.length) {
                 slideIndex = 1;
             } else if (index < 1) {
@@ -323,7 +320,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 slideIndex = index;
             }
 
-            slides[slideIndex - 1].style.display = 'block';
+            slides.forEach((slide, idx) => {
+                if (idx === slideIndex - 1) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
         }
 
         function nextSlide() {
@@ -335,7 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function startAuto() {
-            slideTimer = setInterval(nextSlide, 4000);
+            if (slideTimer) clearInterval(slideTimer);
+            slideTimer = setInterval(nextSlide, 4500);
         }
 
         function resetAuto() {
@@ -345,19 +349,31 @@ document.addEventListener('DOMContentLoaded', function () {
             startAuto();
         }
 
-        // Khởi tạo slide đầu tiên và bắt đầu tự động
+        // Khởi tạo slide đầu tiên
         showSlides(1);
         startAuto();
 
+        // Tạm dừng khi rê chuột vào banner và chạy lại khi rê ra
+        if (sliderContainer) {
+            sliderContainer.addEventListener('mouseenter', function() {
+                if (slideTimer) clearInterval(slideTimer);
+            });
+            sliderContainer.addEventListener('mouseleave', function() {
+                startAuto();
+            });
+        }
+
         if (prevButton) {
-            prevButton.addEventListener('click', function () {
+            prevButton.addEventListener('click', function (e) {
+                e.preventDefault();
                 prevSlide();
                 resetAuto();
             });
         }
 
         if (nextButton) {
-            nextButton.addEventListener('click', function () {
+            nextButton.addEventListener('click', function (e) {
+                e.preventDefault();
                 nextSlide();
                 resetAuto();
             });

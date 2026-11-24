@@ -110,7 +110,7 @@ class MATHANG {
     }
 
     // Lấy mặt hàng theo giới tính (Nam / Nữ / Phụ Kiện) - mặc định sắp theo lượt mua giảm dần
-    public function laymathangtheogioitinh($gioitinh, $limit = 12, $offset = 0, $search = '', $orderby = 'LuotMua DESC, IdSanPham ASC') {
+    public function laymathangtheogioitinh($gioitinh, $limit = 12, $offset = 0, $search = '', $orderby = 'LuotMua DESC, IdSanPham DESC') {
         $db = DATABASE::connect();
         try {
             list($conds, $binds) = $this->buildSearchClauses($gioitinh, $search);

@@ -75,6 +75,9 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
     <a href="/Thoi-Trang-Quality/Admin/QuanLyChat.php" class="<?= ($current_script == 'QuanLyChat.php' || $current_dir == 'qlchat') ? 'active' : '' ?>">
         <i class="fa fa-comments"></i> Quản lý Chat
     </a>
+    <a href="/Thoi-Trang-Quality/Admin/QuanLyDanhGia.php" class="<?= ($current_script == 'QuanLyDanhGia.php' || $current_dir == 'qldanhgia') ? 'active' : '' ?>">
+        <i class="fa fa-star"></i> Quản lý đánh giá
+    </a>
     <?php endif; ?>
 
     <!-- 6. Quản lý người dùng: Duy nhất Super Admin (1) -->

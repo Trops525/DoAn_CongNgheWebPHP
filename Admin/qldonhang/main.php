@@ -46,8 +46,9 @@ $orders = $dh->laytatcadonhang($loc_status);
                 <th>Ngày đặt</th>
                 <th>Tổng tiền</th>
                 <th>Trạng thái</th>
+                <th>Người duyệt</th>
                 <th>PTTT</th>
-                <th style="text-align: center; width: 200px; min-width: 180px;">Thao tác</th>
+                <th style="text-align: center; width: 170px; min-width: 150px;">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -62,11 +63,21 @@ $orders = $dh->laytatcadonhang($loc_status);
                             <strong><?= htmlspecialchars($row['HoTen'] ?: $row['TenDangNhap'] ?: 'Khách hàng') ?></strong>
                         </td>
                         <td><?= htmlspecialchars($row['DienThoai']) ?></td>
-                        <td style="max-width: 200px;"><?= htmlspecialchars($row['DiaChi']) ?></td>
+                        <td style="max-width: 180px;"><?= htmlspecialchars($row['DiaChi']) ?></td>
                         <td><?= date('d/m/Y H:i', strtotime($row['NgayDat'])) ?></td>
                         <td><strong style="color: #d0021b;"><?= number_format($row['TongTien'], 0, ',', '.') ?> đ</strong></td>
                         <td style="font-weight: bold; color: <?= $color ?>;">
                             <?= htmlspecialchars($tt) ?>
+                        </td>
+                        <td>
+                            <?php if (!empty($row['NhanVien_HoTen']) || !empty($row['NhanVien_TenDangNhap'])): ?>
+                                <span style="font-size: 13px; font-weight: 600; color: #0d6efd; display: inline-block;">
+                                    <i class="fa fa-user-check"></i> <?= htmlspecialchars($row['NhanVien_HoTen'] ?: $row['NhanVien_TenDangNhap']) ?>
+                                </span>
+                                <br><small style="color: #6c757d;">@<?= htmlspecialchars($row['NhanVien_TenDangNhap']) ?></small>
+                            <?php else: ?>
+                                <span style="font-size: 12px; color: #adb5bd; font-style: italic;">Chưa duyệt</span>
+                            <?php endif; ?>
                         </td>
                         <td><?= ($row['PhuongThucThanhToan'] === 'Chuyển khoản' || $row['PhuongThucThanhToan'] === 'BANK') ? '🏦 CK' : '💳 COD' ?></td>
                         <td style="text-align: center;">

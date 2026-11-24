@@ -224,6 +224,11 @@ $categories = $dm->laydanhmuc();
                                 <?php endif; ?>
                                 <br>
                                 <small style="color:#888;">Mã: <?= htmlspecialchars($row['MaSanPham']) ?> | DM: <?= htmlspecialchars($row['TenDanhMuc'] ?? '') ?></small>
+                                <?php if (!empty(trim($row['MoTa'] ?? ''))): ?>
+                                    <div style="font-size: 12px; color: #555; margin-top: 4px; max-width: 280px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="<?= htmlspecialchars($row['MoTa']) ?>">
+                                        <i class="fa fa-align-left text-muted" style="font-size: 11px;"></i> <?= htmlspecialchars($row['MoTa']) ?>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td><?= number_format($row['DonGia'], 0, ',', '.') ?>đ</td>
                             <td><span style="color:red;">-<?= $row['TiLeGiamGia'] ?>%</span></td>

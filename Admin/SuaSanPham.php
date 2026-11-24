@@ -77,7 +77,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Bổ sung size mới nếu được chọn
+        // Xóa các size được chọn xóa (nếu có)
+        if (!empty($_POST['deleted_sizes']) && is_array($_POST['deleted_sizes'])) {
+            foreach ($_POST['deleted_sizes'] as $delSize) {
+                $delSize = $ket_noi->real_escape_string(trim($delSize));
+                if ($delSize !== '') {
+                    $ket_noi->query("DELETE FROM tbl_bienthe WHERE IdSanPham = $id AND KichThuoc = '$delSize'");
+                }
+            }
+        }
+
+        // Lấy màu sắc sản phẩm để gán cho các biến thể mới
+        $colorRow = $ket_noi->query("SELECT MauSac FROM tbl_bienthe WHERE IdSanPham = $id AND MauSac != '' LIMIT 1");
+        $defaultColor = ($colorRow && $colorRow->num_rows > 0) ? $colorRow->fetch_assoc()['MauSac'] : 'Mặc định';
+        $defaultColor = $ket_noi->real_escape_string($defaultColor ?: 'Mặc định');
+
+        // Bổ sung nhiều size mới (mảng new_sizes[] và new_qtys[])
+        if (!empty($_POST['new_sizes']) && is_array($_POST['new_sizes'])) {
+            for ($i = 0; $i < count($_POST['new_sizes']); $i++) {
+                $rawSize = trim($_POST['new_sizes'][$i] ?? '');
+                if ($rawSize === '__custom__' && !empty($_POST['custom_sizes'][$i])) {
+                    $rawSize = trim($_POST['custom_sizes'][$i]);
+                }
+                $rawQty = isset($_POST['new_qtys'][$i]) && $_POST['new_qtys'][$i] !== '' ? max(0, (int)$_POST['new_qtys'][$i]) : 0;
+                
+                if ($rawSize !== '') {
+                    $newSizeSafe = $ket_noi->real_escape_string($rawSize);
+                    $chk = $ket_noi->query("SELECT IdBienThe FROM tbl_bienthe WHERE IdSanPham = $id AND KichThuoc = '$newSizeSafe'");
+                    if ($chk && $chk->num_rows > 0) {
+                        $ket_noi->query("UPDATE tbl_bienthe SET SoLuong = $rawQty WHERE IdSanPham = $id AND KichThuoc = '$newSizeSafe'");
+                    } else {
+                        $ket_noi->query("INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong) VALUES ($id, '$defaultColor', '$newSizeSafe', $rawQty)");
+                    }
+                }
+            }
+        }
+
+        // Hỗ trợ cả trường hợp new_size đơn lẻ cũ
         if (!empty($_POST['new_size']) && isset($_POST['new_qty']) && $_POST['new_qty'] !== '') {
             $newSize = $ket_noi->real_escape_string(trim($_POST['new_size']));
             $newQty = max(0, (int)$_POST['new_qty']);
@@ -85,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($chk && $chk->num_rows > 0) {
                 $ket_noi->query("UPDATE tbl_bienthe SET SoLuong = $newQty WHERE IdSanPham = $id AND KichThuoc = '$newSize'");
             } else {
-                $ket_noi->query("INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong) VALUES ($id, 'Mặc định', '$newSize', $newQty)");
+                $ket_noi->query("INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong) VALUES ($id, '$defaultColor', '$newSize', $newQty)");
             }
         }
 
@@ -202,11 +238,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <table class="table table-bordered table-hover" style="background: #fff; width: 100%; margin-top: 10px;">
                 <thead>
                     <tr style="background: #e7f3ff;">
-                        <th style="padding: 10px; text-align: left; color: #0056b3; width: 50%;">Kích cỡ (Size)</th>
-                        <th style="padding: 10px; text-align: center; color: #0056b3; width: 50%;">Số Lượng Tồn Kho</th>
+                        <th style="padding: 10px; text-align: left; color: #0056b3; width: 45%;">Kích cỡ (Size)</th>
+                        <th style="padding: 10px; text-align: center; color: #0056b3; width: 40%;">Số Lượng Tồn Kho</th>
+                        <th style="padding: 10px; text-align: center; color: #0056b3; width: 15%;">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="existing-sizes-body">
                     <?php
                     $sql_sizes = "SELECT KichThuoc, SoLuong FROM tbl_bienthe WHERE IdSanPham = $id 
                                   ORDER BY 
@@ -223,38 +260,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         while ($size_row = $result_sizes->fetch_assoc()) {
                             $size = htmlspecialchars($size_row['KichThuoc']);
                             $qty = (int)$size_row['SoLuong'];
-                            echo '<tr>';
+                            echo '<tr id="size-row-' . md5($size) . '">';
                             echo '<td style="padding: 10px 14px; font-weight: 600; vertical-align: middle;">' . $size . '</td>';
                             echo '<td style="padding: 10px 14px; text-align: center;">';
                             echo '<input type="number" name="quantities[' . $size . ']" value="' . $qty . '" min="0" class="form-control" style="width: 110px; margin: 0 auto; text-align: center; font-weight: bold;">';
                             echo '</td>';
+                            echo '<td style="padding: 10px 14px; text-align: center; vertical-align: middle;">';
+                            echo '<button type="button" class="btn btn-outline-danger btn-sm" onclick="markDeleteSize(this, \'' . addslashes($size) . '\')" title="Xóa size này"><i class="fa fa-trash"></i> Xóa</button>';
+                            echo '</td>';
                             echo '</tr>';
                         }
                     } else {
-                        echo '<tr><td colspan="2" style="padding: 15px; text-align: center; color: #999;">Sản phẩm này chưa có size nào</td></tr>';
+                        echo '<tr id="no-size-row"><td colspan="3" style="padding: 15px; text-align: center; color: #999;">Sản phẩm này chưa có size nào</td></tr>';
                     }
                     ?>
                 </tbody>
             </table>
+            <div id="deleted-sizes-container"></div>
 
-            <!-- Bổ sung size mới -->
-            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed #b3d9ff; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 140px;">
-                    <label style="font-size: 12px; font-weight: 600; margin-bottom: 4px; display: block; color: #0056b3;">+ Bổ sung Size mới:</label>
-                    <select name="new_size" class="form-select" style="padding: 8px 12px; font-size: 13px;">
-                        <option value="">-- Chọn Size để thêm --</option>
-                        <option value="S">Size S</option>
-                        <option value="M">Size M</option>
-                        <option value="L">Size L</option>
-                        <option value="XL">Size XL</option>
-                        <option value="XXL">Size XXL</option>
-                        <option value="3XL">Size 3XL</option>
-                        <option value="Freesize">Freesize</option>
-                    </select>
+            <!-- BỔ SUNG NHIỀU SIZE MỚI -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #b3d9ff;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <label style="font-size: 13.5px; font-weight: 700; color: #0056b3; margin: 0;">
+                        <i class="fa fa-plus-circle"></i> Bổ sung Size mới (Có thể nhấn thêm nhiều size):
+                    </label>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addNewSizeRow()" style="font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px;">
+                        <i class="fa fa-plus"></i> + Thêm Size mới
+                    </button>
                 </div>
-                <div style="flex: 1; min-width: 120px;">
-                    <label style="font-size: 12px; font-weight: 600; margin-bottom: 4px; display: block; color: #0056b3;">Số lượng nhập:</label>
-                    <input type="number" name="new_qty" min="0" placeholder="0" class="form-control" style="padding: 8px 12px; font-size: 13px;">
+
+                <div id="new-sizes-container" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- JS sẽ chèn các dòng thêm size vào đây -->
                 </div>
             </div>
         </div>
@@ -263,6 +299,108 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <a href="index.php" class="btn-back" style="display: block; text-align: center; margin-top: 15px;">← Hủy và quay lại danh sách</a>
     </form>
 </div>
+
+<script>
+const AVAILABLE_SIZES = [
+    { val: 'S', label: 'Size S' },
+    { val: 'M', label: 'Size M' },
+    { val: 'L', label: 'Size L' },
+    { val: 'XL', label: 'Size XL' },
+    { val: 'XXL', label: 'Size XXL' },
+    { val: '3XL', label: 'Size 3XL' },
+    { val: '4XL', label: 'Size 4XL' },
+    { val: 'Freesize', label: 'Freesize' },
+    { val: '28', label: 'Size 28' },
+    { val: '29', label: 'Size 29' },
+    { val: '30', label: 'Size 30' },
+    { val: '31', label: 'Size 31' },
+    { val: '32', label: 'Size 32' },
+    { val: '33', label: 'Size 33' },
+    { val: '34', label: 'Size 34' },
+    { val: '__custom__', label: '✏️ Nhập size khác...' }
+];
+
+function addNewSizeRow() {
+    const container = document.getElementById('new-sizes-container');
+    const rowId = 'row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    
+    let optionsHtml = '<option value="">-- Chọn Size --</option>';
+    AVAILABLE_SIZES.forEach(s => {
+        optionsHtml += `<option value="${s.val}">${s.label}</option>`;
+    });
+
+    const row = document.createElement('div');
+    row.id = rowId;
+    row.className = 'new-size-row';
+    row.style = 'display: flex; gap: 10px; align-items: center; background: #fff; padding: 10px 12px; border-radius: 6px; border: 1px solid #cce5ff; flex-wrap: wrap; animation: fadeIn 0.2s ease-in-out;';
+    
+    row.innerHTML = `
+        <div style="flex: 2; min-width: 160px;">
+            <select name="new_sizes[]" class="form-select form-select-sm" onchange="handleSizeSelectChange(this)" style="padding: 8px 10px; font-size: 13px;" required>
+                ${optionsHtml}
+            </select>
+            <input type="text" name="custom_sizes[]" placeholder="Nhập tên size tùy ý..." class="form-control form-control-sm mt-1" style="display: none; padding: 6px 10px; font-size: 13px;">
+        </div>
+        <div style="flex: 1.5; min-width: 130px; display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; color: #555; white-space: nowrap;">SL:</span>
+            <input type="number" name="new_qtys[]" min="0" value="10" placeholder="Số lượng" class="form-control form-control-sm" style="padding: 8px 10px; font-size: 13px; text-align: center; font-weight: bold;" required>
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeNewSizeRow('${rowId}')" title="Xóa dòng size này" style="padding: 7px 11px;">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+    container.appendChild(row);
+}
+
+function removeNewSizeRow(rowId) {
+    const el = document.getElementById(rowId);
+    if (el) {
+        el.remove();
+    }
+}
+
+function handleSizeSelectChange(selectElem) {
+    const customInput = selectElem.nextElementSibling;
+    if (selectElem.value === '__custom__') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+        customInput.focus();
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+        customInput.value = '';
+    }
+}
+
+function markDeleteSize(btn, sizeName) {
+    if (!confirm('Bạn có chắc chắn muốn xóa Size "' + sizeName + '" của sản phẩm này? Thay đổi sẽ có hiệu lực sau khi bấm "Cập nhật thay đổi".')) {
+        return;
+    }
+    const tr = btn.closest('tr');
+    if (tr) {
+        tr.style.textDecoration = 'line-through';
+        tr.style.background = '#f8d7da';
+        tr.style.opacity = '0.6';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-check"></i> Đã đánh dấu xóa';
+
+        const delContainer = document.getElementById('deleted-sizes-container');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'deleted_sizes[]';
+        input.value = sizeName;
+        delContainer.appendChild(input);
+    }
+}
+
+// Tự động tạo sẵn 1 dòng thêm size mới khi tải trang
+document.addEventListener('DOMContentLoaded', function() {
+    addNewSizeRow();
+});
+</script>
 
 </body>
 </html>

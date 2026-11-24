@@ -122,9 +122,11 @@ class DONHANG {
     public function laytatcadonhang($loc_trangthai = '') {
         $db = DATABASE::connect();
         try {
-            $sql = "SELECT dh.*, nd.HoTen, nd.TenDangNhap 
+            $sql = "SELECT dh.*, nd.HoTen, nd.TenDangNhap, 
+                           nv.HoTen AS NhanVien_HoTen, nv.TenDangNhap AS NhanVien_TenDangNhap 
                     FROM tbl_donhang dh 
-                    LEFT JOIN tbl_nguoidung nd ON dh.IdNguoiDung = nd.IdNguoiDung";
+                    LEFT JOIN tbl_nguoidung nd ON dh.IdNguoiDung = nd.IdNguoiDung 
+                    LEFT JOIN tbl_nguoidung nv ON dh.IdNhanVienTao = nv.IdNguoiDung";
             if (!empty($loc_trangthai)) {
                 $sql .= " WHERE dh.TinhTrang = :tt";
             }

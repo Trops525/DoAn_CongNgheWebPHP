@@ -24,7 +24,11 @@ CREATE TABLE IF NOT EXISTS `tbl_nguoidung` (
 INSERT INTO `tbl_nguoidung` (`HoTen`, `TenDangNhap`, `MatKhau`, `Email`, `DienThoai`, `QuyenHan`, `Khoa`) VALUES
 ('Quản trị viên', 'admin', 'e10adc3949ba59abbe56e057f20f883e', 'admin@quality.com', '0999999999', 1, 0),
 ('Tạ Hồng Quân', 'Quan', 'e10adc3949ba59abbe56e057f20f883e', 'quan.khachhang@gmail.com', '0888888888', 2, 0),
-('Trần Đăng Khoa', 'Khoa', 'e10adc3949ba59abbe56e057f20f883e', 'khoa.nhanvien@gmail.com', '0888888889', 3, 0);
+('Trần Đăng Khoa', 'Khoa', 'e10adc3949ba59abbe56e057f20f883e', 'khoa.nhanvien@gmail.com', '0888888889', 3, 0),
+('Nhân viên Kho', 'nvkho', 'e10adc3949ba59abbe56e057f20f883e', 'nvkho@quality.com', '0901000001', 3, 0),
+('Nhân viên CSKH', 'nvcskh', 'e10adc3949ba59abbe56e057f20f883e', 'nvcskh@quality.com', '0901000002', 4, 0),
+('Nhân viên Tài chính', 'nvtaichinh', 'e10adc3949ba59abbe56e057f20f883e', 'nvtaichinh@quality.com', '0901000003', 5, 0),
+('Nguyễn Thị Mai', 'mainguyen', 'e10adc3949ba59abbe56e057f20f883e', 'mai.nguyen@gmail.com', '0934567890', 2, 0);
 
 
 -- --------------------------------------------------------
@@ -38,8 +42,17 @@ CREATE TABLE IF NOT EXISTS `tbl_danhmuc` (
   PRIMARY KEY (`IdDanhMuc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `tbl_danhmuc` (`IdDanhMuc`, `TenDanhMuc`) VALUES 
-(1, 'Áo Thun Nam'), (2, 'Quần Short Nam'), (3, 'Áo Sơ Mi Nam'), (4, 'Áo Polo Nam'), (5, 'Quần Dài Nam'), (6, 'Áo Thun / Áo Thể Thao Nữ'), (7, 'Váy / Đầm Nữ'), (8, 'Quần Dài / Short Nữ'), (9, 'Phụ Kiện');
+INSERT INTO `tbl_danhmuc` (`IdDanhMuc`, `TenDanhMuc`, `MoTa`, `Khoa`) VALUES 
+(1, 'Áo Thun Nam', 'Áo thun nam chất liệu 100% Cotton thoáng mát, co giãn 4 chiều, thiết kế basic hiện đại.', 0),
+(2, 'Quần Short Nam', 'Quần short nam trẻ trung, năng động, phong cách thể thao và dạo phố thoải mái.', 0),
+(3, 'Áo Sơ Mi Nam', 'Áo sơ mi nam công sở, thiết kế thanh lịch, chống nhăn, tôn dáng phái mạnh.', 0),
+(4, 'Áo Polo Nam', 'Áo polo nam lịch lãm, vải cá sấu dệt cao cấp, mềm mịn và thấm hút mồ hôi tối ưu.', 0),
+(5, 'Quần Dài Nam', 'Quần âu tây, quần kaki, jogger dáng ôm thời thượng, chỉn chu mọi góc nhìn.', 0),
+(6, 'Áo Thun / Áo Thể Thao Nữ', 'Áo thun nữ, croptop và đồ tập thể thao tôn dáng, co giãn linh hoạt, thoáng mát.', 0),
+(7, 'Váy / Đầm Nữ', 'Váy đầm nữ thời trang, đầm xòe, đầm suông, maxi dạo phố và dự tiệc duyên dáng.', 0),
+(8, 'Quần Dài / Short Nữ', 'Quần dài, short nữ kiểu dáng baggy, ống rộng bắt kịp xu hướng thời trang trẻ.', 0),
+(9, 'Phụ Kiện', 'Phụ kiện cao cấp: nón lưỡi trai, nón bucket, thắt lưng, tất vớ tạo điểm nhấn cá tính.', 0),
+(10, 'Áo Khoác Nữ', 'Áo khoác gió thể thao, áo khoác track jacket, hoodie và áo khoác studio nữ cản gió, giữ ấm và thời trang.', 0);
 
 -- --------------------------------------------------------
 -- 4. Bảng SẢN PHẨM (tbl_sanpham)
@@ -148,8 +161,17 @@ CREATE TABLE IF NOT EXISTS `tbl_danhgia` (
   `SoSao` int(11) NOT NULL DEFAULT 5,
   `NoiDung` text NOT NULL,
   `NgayDanhGia` datetime DEFAULT current_timestamp(),
+  `Khoa` tinyint(1) NOT NULL DEFAULT 0, -- 0: Hiển thị, 1: Bị ẩn
   PRIMARY KEY (`IdDanhGia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `tbl_danhgia` (`IdSanPham`, `IdNguoiDung`, `SoSao`, `NoiDung`, `NgayDanhGia`, `Khoa`) VALUES
+(1, 2, 5, 'Quần mặc rất êm và co giãn tốt, form dáng thể thao chuẩn chỉ. Shop tư vấn nhiệt tình, đóng gói hộp chỉn chu!', '2026-11-20 15:30:00', 0),
+(2, 7, 5, 'Mua tặng bạn trai, bạn mình khen mặc rất thích! Vải dày dặn, màu trắng tinh khôi trẻ trung, giặt máy không lo xù lông.', '2026-11-21 16:20:00', 0),
+(3, 3, 4, 'Form quần đẹp, bo thun vừa vặn không bị cấn chân khi vận động. Giao hàng nhanh, giá cả rất hợp lý.', '2026-11-21 17:45:00', 0),
+(4, 2, 5, 'Chất vải thể thao co giãn 4 chiều mềm mát, mặc đi tập gym hay chạy bộ đều cực kỳ thoải mái. Sẽ ủng hộ Quality dài dài!', '2026-11-22 09:50:00', 0),
+(25, 3, 5, 'Áo sơ mi vải oxford đứng form, đường may tỉ mỉ, chống nhăn tốt, mặc đi làm rất sang và thanh lịch.', '2026-11-22 10:15:00', 0),
+(109, 7, 5, 'Phụ kiện găng tay chống tia UV ôm vừa tay, chất thun lạnh mát rượi khi đi xe máy trời nắng gắt.', '2026-11-22 11:00:00', 0);
 
 INSERT INTO `tbl_cskh_faq` (`DanhMuc`, `CauHoi`, `TraLoi`, `TrangThai`, `ThuTu`) VALUES
 ('MuaHang', 'Làm thế nào để đặt hàng trên Website?', 'Để đặt hàng, bạn chỉ cần chọn sản phẩm yêu thích, chọn size mong muốn, bấm "Thêm vào giỏ hàng" và điền thông tin thanh toán là hoàn tất nhé!', 1, 1),
@@ -167,6 +189,37 @@ INSERT INTO `tbl_cskh_faq` (`DanhMuc`, `CauHoi`, `TraLoi`, `TrangThai`, `ThuTu`)
 -- 8. NHẬP LÔ HÀNG VÀO BẢNG SẢN PHẨM
 -- --------------------------------------------------------
 INSERT INTO `tbl_sanpham` (`MaSanPham`, `TenSanPham`, `IdDanhMuc`, `GioiTinh`, `HinhAnh`, `DonGia`, `TiLeGiamGia`, `MoTa`) VALUES
+-- QUẦN DÀI NAM
+('JOGGER_FLEX1', 'Jogger Thể Thao Flexline Đỏ', 5, 'Nam', 'images/Nam/Jogger thể thao Flexline Active_Red.jpg', 350000, 0, 'Form ôm thể thao'),
+('JOGGER_FLEX1', 'Jogger Thể Thao Flexline Trắng', 5, 'Nam', 'images/Nam/Jogger thể thao Flexline Active_White.jpg', 350000, 0, 'Form ôm thể thao'),
+('JOGGER_FLEX2', 'Quần Joggers Thể Thao Flexline Đen', 5, 'Nam', 'images/Nam/Quần joggers thể thao nam Flexline Active_Black.jpg', 350000, 0, 'Form ôm thể thao'),
+('JOGGER_FLEX2', 'Quần Joggers Thể Thao Flexline Xanh', 5, 'Nam', 'images/Nam/Quần joggers thể thao nam Flexline Active_Blue.jpg', 350000, 0, 'Form ôm thể thao'),
+('KAKI_STRAIGHT', 'Quần Dài Nam Kaki Excool Straight Đen', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool dáng Straight_Black.jpg', 420000, 10, 'Kaki chống nhăn'),
+('KAKI_STRAIGHT', 'Quần Dài Nam Kaki Excool Straight Xám', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool dáng Straight_Grey.jpg', 420000, 10, 'Kaki chống nhăn'),
+('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Đen', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Black.jpg', 390000, 0, 'Ống vừa vặn'),
+('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Xanh', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Blue.jpg', 390000, 0, 'Ống vừa vặn'),
+('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Xám', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Grey.jpg', 390000, 0, 'Ống vừa vặn'),
+('JEAN_BASIC', 'Quần Jeans Nam Basics Straight Đen', 5, 'Nam', 'images/Nam/Quần Jeans Nam Basics dáng Straight_Black.jpg', 499000, 0, 'Jeans nam tính'),
+('JEAN_BASIC', 'Quần Jeans Nam Basics Straight Xanh', 5, 'Nam', 'images/Nam/Quần Jeans Nam Basics dáng Straight_Blue.jpg', 499000, 0, 'Jeans nam tính'),
+('JOGGER_DAILY', 'Quần Jogger Nam Daily Wear Đen', 5, 'Nam', 'images/Nam/Quần Jogger Nam Daily Wear.jpg', 320000, 0, 'Mặc hàng ngày cực thoải mái'),
+-- QUẦN SHORT NAM
+('SHORT_PROMAX', 'Quần Short Nam Thể Thao Promax-S1 Đen', 2, 'Nam', 'images/Nam/Quần Short Nam Thể Thao Promax-S1_Black.jpg', 250000, 0, 'Ngắn vừa phải, co giãn tốt'),
+('SHORT_PROMAX', 'Quần Short Nam Thể Thao Promax-S1 Xanh', 2, 'Nam', 'images/Nam/Quần Short Nam Thể Thao Promax-S1_Blue.jpg', 250000, 0, 'Ngắn vừa phải, co giãn tốt'),
+('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Be', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Be.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
+('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Đen', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Black.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
+('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Blue.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
+('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Đen', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_Black.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
+('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Xanh', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_Blue.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
+('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Trắng', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_White.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
+('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Đen', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_Black.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
+('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_Blue.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
+('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Trắng', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_White.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
+('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Be', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Be.jpg', 210000, 0, 'Cho các bài tập Cardio'),
+('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Đen', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Black.jpg', 210000, 0, 'Cho các bài tập Cardio'),
+('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Blue.jpg', 210000, 0, 'Cho các bài tập Cardio'),
+('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Đen', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Black.jpg', 250000, 0, 'Bền bỉ, chống xước'),
+('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Xanh', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Blue.jpg', 250000, 0, 'Bền bỉ, chống xước'),
+('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Xanh Lá', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Green.jpg', 250000, 0, 'Bền bỉ, chống xước'),
 -- ÁO POLO NAM
 ('POLO_CAFE', 'Áo Polo Nam Cafe Đen', 4, 'Nam', 'images/Nam/Áo Polo Nam Cafe_Black.jpg', 350000, 0, 'Sợi nilon bã cafe khử mùi'),
 ('POLO_CAFE', 'Áo Polo Nam Cafe Xanh', 4, 'Nam', 'images/Nam/Áo Polo Nam Cafe_Blue.jpg', 350000, 0, 'Sợi nilon bã cafe khử mùi'),
@@ -207,48 +260,17 @@ INSERT INTO `tbl_sanpham` (`MaSanPham`, `TenSanPham`, `IdDanhMuc`, `GioiTinh`, `
 ('TSHIRT_PROMAX', 'Tshirt Thể Thao Promax Flexline Xanh', 1, 'Nam', 'images/Nam/Tshirt thể thao Promax Flexline Active_Blue.jpg', 280000, 0, 'Mẫu mới cực chất'),
 ('TSHIRT_PROMAX', 'Tshirt Thể Thao Promax Flexline Đỏ', 1, 'Nam', 'images/Nam/Tshirt thể thao Promax Flexline Active_Red.jpg', 280000, 0, 'Mẫu mới cực chất'),
 ('TSHIRT_PROMAX', 'Tshirt Thể Thao Promax Flexline Trắng', 1, 'Nam', 'images/Nam/Tshirt thể thao Promax Flexline Active_White.jpg', 280000, 0, 'Mẫu mới cực chất'),
--- QUẦN DÀI NAM
-('JOGGER_FLEX1', 'Jogger Thể Thao Flexline Đỏ', 5, 'Nam', 'images/Nam/Jogger thể thao Flexline Active_Red.jpg', 350000, 0, 'Form ôm thể thao'),
-('JOGGER_FLEX1', 'Jogger Thể Thao Flexline Trắng', 5, 'Nam', 'images/Nam/Jogger thể thao Flexline Active_White.jpg', 350000, 0, 'Form ôm thể thao'),
-('JOGGER_FLEX2', 'Quần Joggers Thể Thao Flexline Đen', 5, 'Nam', 'images/Nam/Quần joggers thể thao nam Flexline Active_Black.jpg', 350000, 0, 'Form ôm thể thao'),
-('JOGGER_FLEX2', 'Quần Joggers Thể Thao Flexline Xanh', 5, 'Nam', 'images/Nam/Quần joggers thể thao nam Flexline Active_Blue.jpg', 350000, 0, 'Form ôm thể thao'),
-('KAKI_STRAIGHT', 'Quần Dài Nam Kaki Excool Straight Đen', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool dáng Straight_Black.jpg', 420000, 10, 'Kaki chống nhăn'),
-('KAKI_STRAIGHT', 'Quần Dài Nam Kaki Excool Straight Xám', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool dáng Straight_Grey.jpg', 420000, 10, 'Kaki chống nhăn'),
-('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Đen', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Black.jpg', 390000, 0, 'Ống vừa vặn'),
-('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Xanh', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Blue.jpg', 390000, 0, 'Ống vừa vặn'),
-('KAKI_EXCOOL', 'Quần Dài Nam Kaki Excool Xám', 5, 'Nam', 'images/Nam/Quần Dài Nam Kaki Excool_Grey.jpg', 390000, 0, 'Ống vừa vặn'),
-('JEAN_BASIC', 'Quần Jeans Nam Basics Straight Đen', 5, 'Nam', 'images/Nam/Quần Jeans Nam Basics dáng Straight_Black.jpg', 499000, 0, 'Jeans nam tính'),
-('JEAN_BASIC', 'Quần Jeans Nam Basics Straight Xanh', 5, 'Nam', 'images/Nam/Quần Jeans Nam Basics dáng Straight_Blue.jpg', 499000, 0, 'Jeans nam tính'),
-('JOGGER_DAILY', 'Quần Jogger Nam Daily Wear Đen', 5, 'Nam', 'images/Nam/Quần Jogger Nam Daily Wear.jpg', 320000, 0, 'Mặc hàng ngày cực thoải mái'),
--- QUẦN SHORT NAM
-('SHORT_PROMAX', 'Quần Short Nam Thể Thao Promax-S1 Đen', 2, 'Nam', 'images/Nam/Quần Short Nam Thể Thao Promax-S1_Black.jpg', 250000, 0, 'Ngắn vừa phải, co giãn tốt'),
-('SHORT_PROMAX', 'Quần Short Nam Thể Thao Promax-S1 Xanh', 2, 'Nam', 'images/Nam/Quần Short Nam Thể Thao Promax-S1_Blue.jpg', 250000, 0, 'Ngắn vừa phải, co giãn tốt'),
-('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Be', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Be.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
-('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Đen', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Black.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
-('SHORT_KAKI', 'Quần Shorts Nam Kaki Excool Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Nam Kaki Excool_Blue.jpg', 280000, 0, 'Mặc đi chơi cực chất'),
-('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Đen', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_Black.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
-('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Xanh', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_Blue.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
-('SHORT_EXDRY', 'Quần Shorts Nam Logo Basic Exdry Trắng', 2, 'Nam', 'images/Nam/Quần shorts nam logo basic Exdry ProActive World Cup_White.jpg', 199000, 0, 'Siêu nhẹ, thoát mồ hôi'),
-('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Đen', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_Black.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
-('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_Blue.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
-('SHORT_SUMMER', 'Quần Shorts Summer Cool 7inch Trắng', 2, 'Nam', 'images/Nam/Quần Shorts Summer Cool 7inch 2 lớp_White.jpg', 220000, 0, 'Có quần lót bảo vệ bên trong'),
-('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Be', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Be.jpg', 210000, 0, 'Cho các bài tập Cardio'),
-('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Đen', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Black.jpg', 210000, 0, 'Cho các bài tập Cardio'),
-('SHORT_MOVING', 'Quần Shorts Thể Thao 5 Moving Xanh', 2, 'Nam', 'images/Nam/Quần Shorts Thể Thao 5 Moving_Blue.jpg', 210000, 0, 'Cho các bài tập Cardio'),
-('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Đen', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Black.jpg', 250000, 0, 'Bền bỉ, chống xước'),
-('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Xanh', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Blue.jpg', 250000, 0, 'Bền bỉ, chống xước'),
-('SHORT_ULTRA', 'Quần Thể Thao Nam 7 Ultra Shorts Xanh Lá', 2, 'Nam', 'images/Nam/Quần Thể Thao Nam 7 Ultra Shorts_Green.jpg', 250000, 0, 'Bền bỉ, chống xước'),
 -- ÁO NỮ
 ('CROP_EXDRY', 'Áo Crop Cổ V Exdry Be', 6, 'Nữ', 'images/Nu/Áo crop cổ V Exdry ProActive World Cup_Be.jpg', 199000, 0, 'Áo crop khoe eo thon'),
 ('CROP_EXDRY', 'Áo Crop Cổ V Exdry Xanh Lá', 6, 'Nữ', 'images/Nu/Áo crop cổ V Exdry ProActive World Cup_Green.jpg', 199000, 0, 'Áo crop khoe eo thon'),
 ('CROP_EXDRY', 'Áo Crop Cổ V Exdry Trắng', 6, 'Nữ', 'images/Nu/Áo crop cổ V Exdry ProActive World Cup_White.jpg', 199000, 0, 'Áo crop khoe eo thon'),
 ('LONG_VITAL', 'Áo Dài Tay Thể Thao Vital Seamless Đen', 6, 'Nữ', 'images/Nu/Áo dài tay thể thao Vital Seamless_Black.jpg', 299000, 0, 'Ôm sát body, giữ nhiệt'),
 ('LONG_VITAL', 'Áo Dài Tay Thể Thao Vital Seamless Hồng', 6, 'Nữ', 'images/Nu/Áo dài tay thể thao Vital Seamless_Pink.jpg', 299000, 0, 'Ôm sát body, giữ nhiệt'),
-('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Be', 6, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Be.jpg', 550000, 15, 'Chống gió cực đỉnh'),
-('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Đen', 6, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Black.jpg', 550000, 15, 'Chống gió cực đỉnh'),
-('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Xanh Lá', 6, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Green.jpg', 550000, 15, 'Chống gió cực đỉnh'),
-('JACKET_STUDIO', 'Áo Khoác Thể Thao Nữ Studio Be', 6, 'Nữ', 'images/Nu/Áo khoác thể thao nữ Studio_Be.jpg', 450000, 0, 'Thời trang tập Yoga/Gym'),
-('JACKET_STUDIO', 'Áo Khoác Thể Thao Nữ Studio Xanh', 6, 'Nữ', 'images/Nu/Áo khoác thể thao nữ Studio_Blue.jpg', 450000, 0, 'Thời trang tập Yoga/Gym'),
+('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Be', 10, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Be.jpg', 550000, 15, 'Chống gió cực đỉnh'),
+('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Đen', 10, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Black.jpg', 550000, 15, 'Chống gió cực đỉnh'),
+('JACKET_TRACK', 'Áo Khoác Nữ Track Jacket Xanh Lá', 10, 'Nữ', 'images/Nu/Áo khoác nữ Track Jacket Windbreaker khoá kéo_Green.jpg', 550000, 15, 'Chống gió cực đỉnh'),
+('JACKET_STUDIO', 'Áo Khoác Thể Thao Nữ Studio Be', 10, 'Nữ', 'images/Nu/Áo khoác thể thao nữ Studio_Be.jpg', 450000, 0, 'Thời trang tập Yoga/Gym'),
+('JACKET_STUDIO', 'Áo Khoác Thể Thao Nữ Studio Xanh', 10, 'Nữ', 'images/Nu/Áo khoác thể thao nữ Studio_Blue.jpg', 450000, 0, 'Thời trang tập Yoga/Gym'),
 ('POLO_NU_PRO', 'Áo Polo Thể Thao Nữ Promax Đen', 6, 'Nữ', 'images/Nu/Áo Polo thể thao nữ Promax Exdry_Black.jpg', 280000, 0, 'Phù hợp Golf, Tennis'),
 ('POLO_NU_PRO', 'Áo Polo Thể Thao Nữ Promax Xanh', 6, 'Nữ', 'images/Nu/Áo Polo thể thao nữ Promax Exdry_Blue.jpg', 280000, 0, 'Phù hợp Golf, Tennis'),
 ('POLO_NU_PRO', 'Áo Polo Thể Thao Nữ Promax Trắng', 6, 'Nữ', 'images/Nu/Áo Polo thể thao nữ Promax Exdry_White.jpg', 280000, 0, 'Phù hợp Golf, Tennis'),
@@ -317,18 +339,49 @@ CROSS JOIN (
 WHERE IdDanhMuc != 9;
 
 -- Biến thể phụ kiện (Freesize và màu sắc thực tế)
-INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong) VALUES
-(109, 'Đen', 'Freesize', 20),
-(110, 'Xám', 'Freesize', 20),
-(111, 'Xám', 'Freesize', 20),
-(112, 'Xám', 'Freesize', 20),
-(113, 'Đen', 'Freesize', 20),
-(114, 'Trắng', 'Freesize', 20),
-(115, 'Đen', 'Freesize', 20),
-(116, 'Đen', 'Freesize', 20),
-(117, 'Đỏ', 'Freesize', 20),
-(118, 'Đen', 'Freesize', 20),
-(119, 'Xám', 'Freesize', 20);
+INSERT INTO tbl_bienthe (IdSanPham, MauSac, KichThuoc, SoLuong)
+SELECT IdSanPham, CASE WHEN TenSanPham LIKE '%Đen%' THEN 'Đen' WHEN TenSanPham LIKE '%Trắng%' THEN 'Trắng' WHEN TenSanPham LIKE '%Đỏ%' THEN 'Đỏ' ELSE 'Xám' END, 'Freesize', 20
+FROM tbl_sanpham WHERE IdDanhMuc = 9;
+
+-- --------------------------------------------------------
+-- DỮ LIỆU ĐƠN HÀNG VÀ CHI TIẾT ĐƠN HÀNG MẪU
+-- --------------------------------------------------------
+INSERT INTO `tbl_donhang` (`IdDonHang`, `IdNguoiDung`, `IdNhanVienTao`, `NgayDat`, `TongTien`, `DiaChi`, `DienThoai`, `TinhTrang`, `PhuongThucThanhToan`, `GhiChu`) VALUES
+(1, 2, 5, '2026-11-20 09:30:00', 700000, 'Số 123 Đường Nguyễn Trãi, Phường 2, Quận 5, TP. Hồ Chí Minh', '0888888888', 'Đã giao', 'COD', 'Giao hàng trong giờ hành chính'),
+(2, 3, 1, '2026-11-21 14:15:00', 700000, 'Tòa Landmark 81, 720A Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh', '0888888889', 'Đang giao', 'Chuyển khoản', 'Gọi trước khi giao hàng 15 phút'),
+(3, 7, NULL, '2026-11-22 08:45:00', 700000, 'Số 45 Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh', '0934567890', 'Đang xử lý', 'COD', 'Đóng gói hộp quà cẩn thận giúp mình nhé shop'),
+(4, 2, 5, '2026-11-22 11:20:00', 350000, 'Số 123 Đường Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh', '0888888888', 'Đang giao', 'Chuyển khoản', 'Đã chuyển khoản qua Vietcombank'),
+(5, 3, 5, '2026-11-19 10:00:00', 350000, 'Số 88 Trần Phú, Hà Đông, Hà Nội', '0888888889', 'Yêu cầu trả hàng', 'COD', 'Khách yêu cầu đổi size vì mặc hơi chật'),
+(6, 7, NULL, '2026-11-18 16:30:00', 350000, 'Số 45 Lê Duẩn, Quận 1, TP. Hồ Chí Minh', '0934567890', 'Đã hủy', 'COD', 'Khách đổi ý muốn đặt mẫu khác');
+
+INSERT INTO `tbl_chitietdonhang` (`IdDonHang`, `IdSanPham`, `KichThuoc`, `SoLuong`, `DonGia`, `TongTien`) VALUES
+(1, 1, 'L', 1, 350000, 350000),
+(1, 2, 'XL', 1, 350000, 350000),
+(2, 3, 'M', 2, 350000, 700000),
+(3, 1, 'M', 1, 350000, 350000),
+(3, 4, 'L', 1, 350000, 350000),
+(4, 2, 'L', 1, 350000, 350000),
+(5, 4, 'M', 1, 350000, 350000),
+(6, 3, 'S', 1, 350000, 350000);
+
+-- --------------------------------------------------------
+-- DỮ LIỆU CHAT CSKH MẪU
+-- --------------------------------------------------------
+INSERT INTO `tbl_cskh_chat` (`IdNguoiDung`, `NguoiGui`, `NoiDung`, `ThoiGian`) VALUES
+(2, 1, 'Chào shop, mẫu Quần Jogger Flexline màu đỏ còn size L không ạ?', '2026-11-22 09:10:00'),
+(2, 2, 'Dạ chào bạn Quân! Mẫu Jogger Flexline Đỏ size L bên shop vẫn còn sẵn hàng bạn nhé.', '2026-11-22 09:12:00'),
+(2, 1, 'Mình cao 1m72 nặng 68kg thì mặc size L có vừa vặn không shop?', '2026-11-22 09:14:00'),
+(2, 2, 'Dạ với chiều cao cân nặng của bạn thì size L mặc vừa chuẩn form thể thao rất tôn dáng luôn ạ.', '2026-11-22 09:15:30'),
+(2, 1, 'Cảm ơn shop nhé, mình vừa bấm đặt đơn hàng qua web rồi đó ạ.', '2026-11-22 09:18:00'),
+(2, 2, 'Dạ shop đã nhận được đơn của bạn và đang tiến hành đóng gói để gửi ngay hôm nay ạ. Cảm ơn bạn đã tin tưởng Quality!', '2026-11-22 09:20:00'),
+(3, 1, 'Shop ơi cho mình hỏi đơn hàng vận chuyển về khu vực Hà Nội thì bao lâu nhận được?', '2026-11-21 15:00:00'),
+(3, 2, 'Dạ chào bạn Khoa, đơn hàng giao tuyến TP.HCM - Hà Nội thời gian vận chuyển tiêu chuẩn từ 2 - 3 ngày làm việc bạn nhé.', '2026-11-21 15:05:00'),
+(3, 1, 'Lúc nhận hàng mình có được đồng kiểm xem hàng trước không shop?', '2026-11-21 15:07:00'),
+(3, 2, 'Dạ hoàn toàn được ạ! Quality hỗ trợ kiểm tra hàng khi nhận và hỗ trợ đổi size miễn phí trong 7 ngày nếu không vừa form ạ.', '2026-11-21 15:09:00'),
+(7, 1, 'Shop ơi shop có gợi ý đầm xòe hoặc áo croptop nào xinh để đi chơi cuối tuần không tư vấn giúp mình với!', '2026-11-22 10:20:00'),
+(7, 2, 'Dạ Quality chào bạn Mai! Bên shop hiện đang có mẫu Váy Đầm Xòe Dạo Phố và Áo Thể Thao Nữ chất liệu cotton lạnh cực kỳ mềm mịn, thoáng mát và tôn dáng rất xinh ạ.', '2026-11-22 10:22:30'),
+(7, 1, 'Chất vải giặt máy có bị xù lông hay phai màu không shop ơi?', '2026-11-22 10:25:00'),
+(7, 2, 'Dạ bạn yên tâm nha, các dòng sản phẩm của Quality đều được xử lý bề mặt chống xù lông và giữ màu bền đẹp qua nhiều lần giặt ạ.', '2026-11-22 10:27:00');
 
 -- --------------------------------------------------------
 -- 10. RÀNG BUỘC KHÓA NGOẠI (FOREIGN KEYS)

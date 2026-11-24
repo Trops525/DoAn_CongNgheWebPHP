@@ -79,13 +79,35 @@ class DANHMUC {
         }
     }
 
-    // Đổi trạng thái Khóa / Mở danh mục
+    // Đổi trạng thái Khóa / Mở danh mục (đồng thời khóa / mở các sản phẩm thuộc danh mục đó)
     public function doitrangthai($id) {
         $db = DATABASE::connect();
         try {
-            $cmd = $db->prepare("UPDATE tbl_danhmuc SET Khoa = 1 - COALESCE(Khoa, 0) WHERE IdDanhMuc = :id");
-            $cmd->bindValue(":id", (int)$id, PDO::PARAM_INT);
-            return $cmd->execute();
+            $id = (int)$id;
+            // 1. Lấy trạng thái hiện tại của danh mục
+            $check = $db->prepare("SELECT Khoa FROM tbl_danhmuc WHERE IdDanhMuc = :id LIMIT 1");
+            $check->execute([':id' => $id]);
+            $current = $check->fetch(PDO::FETCH_ASSOC);
+            if (!$current) {
+                return false;
+            }
+
+            // Trạng thái mới: nếu đang 0 (mở) thì chuyển thành 1 (khóa), ngược lại thành 0
+            $newStatus = (!empty($current['Khoa'])) ? 0 : 1;
+
+            // 2. Cập nhật trạng thái danh mục
+            $cmd = $db->prepare("UPDATE tbl_danhmuc SET Khoa = :status WHERE IdDanhMuc = :id");
+            $cmd->bindValue(":status", $newStatus, PDO::PARAM_INT);
+            $cmd->bindValue(":id", $id, PDO::PARAM_INT);
+            $cmd->execute();
+
+            // 3. Cập nhật đồng bộ trạng thái cho tất cả sản phẩm thuộc danh mục này
+            $cmdSp = $db->prepare("UPDATE tbl_sanpham SET Khoa = :status WHERE IdDanhMuc = :id");
+            $cmdSp->bindValue(":status", $newStatus, PDO::PARAM_INT);
+            $cmdSp->bindValue(":id", $id, PDO::PARAM_INT);
+            $cmdSp->execute();
+
+            return true;
         } catch (PDOException $e) {
             return false;
         }

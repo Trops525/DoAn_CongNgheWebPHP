@@ -299,7 +299,7 @@ if (isset($_SESSION['user_id'])) {
         <?php elseif (!isset($_SESSION['user_id'])): ?>
             <p style="color: #666; font-style: italic; margin-bottom: 20px;">Vui lòng <a href="dangnhap.php">đăng nhập</a> để đánh giá sản phẩm.</p>
         <?php else: ?>
-            <p style="color: #666; font-style: italic; margin-bottom: 20px;">Bạn cần mua và nhận sản phẩm này thành công để có thể viết đánh giá.</p>
+            <p style="color: #666; font-style: italic; margin-bottom: 20px;">Bạn cần mua sản phẩm để có thể viết đánh giá.</p>
         <?php endif; ?>
 
         <div class="review-list">

@@ -12,10 +12,10 @@ if (!isset($mh)) {
     $mh = new MATHANG();
 }
 
-// 1. Lấy danh sách sản phẩm theo giới tính (mặc định sắp xếp theo lượt mua nhiều nhất)
+// 1. Lấy danh sách sản phẩm theo giới tính (mặc định sắp xếp theo sản phẩm mới nhất: IdSanPham DESC)
 $total_items = $mh->demtongmathang($gender, $q);
 $total_pages = ceil($total_items / $items_per_page);
-$mathang = $mh->laymathangtheogioitinh($gender, $items_per_page, $offset, $q, 'LuotMua DESC, IdSanPham ASC');
+$mathang = $mh->laymathangtheogioitinh($gender, $items_per_page, $offset, $q, 'IdSanPham DESC');
 
 $q_param = $q !== '' ? '&q=' . urlencode($q) : '';
 $gender_param = $gender !== '' ? '&gender=' . urlencode($gender) : '';

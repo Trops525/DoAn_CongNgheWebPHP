@@ -78,7 +78,7 @@ $select_cols = $join_bienthe ? "DISTINCT sp.*" : "sp.*"; // Dùng DISTINCT để
 
 // Lắp ráp câu ORDER BY (Sắp xếp)
 $order_sql = "ORDER BY sp.IdSanPham DESC"; // Mặc định: Mới nhất
-if ($sort === 'bestseller') $order_sql = "ORDER BY sp.LuotMua DESC";
+if ($sort === 'bestseller') $order_sql = "ORDER BY sp.LuotMua DESC, sp.IdSanPham DESC";
 if ($sort === 'sale') $order_sql = "ORDER BY sp.TiLeGiamGia DESC";
 if ($sort === 'price_asc') $order_sql = "ORDER BY sp.DonGia ASC";
 if ($sort === 'price_desc') $order_sql = "ORDER BY sp.DonGia DESC";

@@ -386,7 +386,7 @@ INSERT INTO `tbl_cskh_chat` (`IdNguoiDung`, `NguoiGui`, `NoiDung`, `ThoiGian`) V
 -- --------------------------------------------------------
 -- 10. RÀNG BUỘC KHÓA NGOẠI (FOREIGN KEYS)
 -- --------------------------------------------------------
-ALTER TABLE `tbl_sanpham` ADD CONSTRAINT `fk_sp_dm` FOREIGN KEY (`IdDanhMuc`) REFERENCES `tbl_danhmuc` (`IdDanhMuc`) ON DELETE CASCADE;
+ALTER TABLE `tbl_sanpham` ADD CONSTRAINT `fk_sp_dm` FOREIGN KEY (`IdDanhMuc`) REFERENCES `tbl_danhmuc` (`IdDanhMuc`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `tbl_bienthe` ADD CONSTRAINT `fk_bt_sp` FOREIGN KEY (`IdSanPham`) REFERENCES `tbl_sanpham` (`IdSanPham`) ON DELETE CASCADE;
 ALTER TABLE `tbl_donhang` ADD CONSTRAINT `fk_dh_nd` FOREIGN KEY (`IdNguoiDung`) REFERENCES `tbl_nguoidung` (`IdNguoiDung`) ON DELETE CASCADE;
 ALTER TABLE `tbl_chitietdonhang` ADD CONSTRAINT `fk_ct_dh` FOREIGN KEY (`IdDonHang`) REFERENCES `tbl_donhang` (`IdDonHang`) ON DELETE CASCADE;

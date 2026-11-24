@@ -63,8 +63,9 @@ require_once __DIR__ . '/../inc/top.php';
     <table style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="background: #f8f9fa;">
-                <th style="width: 80px; text-align: center;">ID</th>
-                <th style="width: 240px;">Tên danh mục</th>
+                <th style="width: 70px; text-align: center;">ID</th>
+                <th style="width: 220px;">Tên danh mục</th>
+                <th style="width: 120px; text-align: center;">Số lượng SP</th>
                 <th>Mô tả</th>
                 <th style="width: 190px; text-align: center;">Thao tác</th>
             </tr>
@@ -73,6 +74,7 @@ require_once __DIR__ . '/../inc/top.php';
             <?php if (!empty($danhmuc)): ?>
                 <?php foreach ($danhmuc as $row): 
                     $isLocked = !empty($row['Khoa']);
+                    $spCount = (int)($row['SoLuongSanPham'] ?? 0);
                 ?>
                     <tr style="<?= $isLocked ? 'background: #fff5f5; opacity: 0.88;' : '' ?>">
                         <td style="text-align: center; font-weight: bold; color: #6c757d;">#<?= $row['IdDanhMuc'] ?></td>
@@ -84,6 +86,11 @@ require_once __DIR__ . '/../inc/top.php';
                                 </span>
                             <?php endif; ?>
                         </td>
+                        <td style="text-align: center;">
+                            <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12.5px; font-weight: 600; background: <?= $spCount > 0 ? '#e7f1ff' : '#f8f9fa' ?>; color: <?= $spCount > 0 ? '#0d6efd' : '#adb5bd' ?>; border: 1px solid <?= $spCount > 0 ? '#b6d4fe' : '#dee2e6' ?>;">
+                                <?= $spCount ?> sản phẩm
+                            </span>
+                        </td>
                         <td style="color: #555; line-height: 1.5;">
                             <?= !empty(trim($row['MoTa'] ?? '')) ? htmlspecialchars($row['MoTa']) : '<em style="color:#aaa;">(Chưa có mô tả)</em>' ?>
                         </td>
@@ -93,13 +100,21 @@ require_once __DIR__ . '/../inc/top.php';
                                 <?= $isLocked ? '<i class="fa fa-unlock"></i> Mở' : '<i class="fa fa-lock"></i> Khóa' ?>
                             </a>
                             <?php if ($userRole == 1): ?>
-                                <a href="?action=xoa&id=<?= $row['IdDanhMuc'] ?>" class="btn btn-delete" style="padding: 6px 10px;" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');"><i class="fa fa-trash"></i> Xóa</a>
+                                <?php if ($spCount > 0): ?>
+                                    <button type="button" class="btn" style="background: #e9ecef; color: #adb5bd; padding: 6px 10px; cursor: not-allowed; border: 1px solid #ced4da;" onclick="alert('Không thể xóa! Danh mục này hiện đang có <?= $spCount ?> sản phẩm. Bạn hãy dùng tính năng Khóa để ẩn danh mục, hoặc chuyển hết sản phẩm sang danh mục khác trước khi xóa.');" title="Còn sản phẩm, không thể xóa">
+                                        <i class="fa fa-trash"></i> Xóa
+                                    </button>
+                                <?php else: ?>
+                                    <a href="?action=xoa&id=<?= $row['IdDanhMuc'] ?>" class="btn btn-delete" style="padding: 6px 10px;" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');" title="Xóa danh mục trống này">
+                                        <i class="fa fa-trash"></i> Xóa
+                                    </a>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
-                <tr><td colspan="4" style="text-align: center; color: #888; padding: 40px;">Chưa có danh mục nào.</td></tr>
+                <tr><td colspan="5" style="text-align: center; color: #888; padding: 40px;">Chưa có danh mục nào.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

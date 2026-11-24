@@ -6,11 +6,15 @@ class DANHMUC {
     public $tendanhmuc;
     public $mota;
 
-    // Lấy toàn bộ danh mục
+    // Lấy toàn bộ danh mục kèm số lượng sản phẩm
     public function laydanhmuc() {
         $db = DATABASE::connect();
         try {
-            $sql = "SELECT * FROM tbl_danhmuc ORDER BY IdDanhMuc ASC";
+            $sql = "SELECT dm.*, COUNT(sp.IdSanPham) AS SoLuongSanPham 
+                    FROM tbl_danhmuc dm 
+                    LEFT JOIN tbl_sanpham sp ON dm.IdDanhMuc = sp.IdDanhMuc 
+                    GROUP BY dm.IdDanhMuc 
+                    ORDER BY dm.IdDanhMuc ASC";
             $cmd = $db->prepare($sql);
             $cmd->execute();
             return $cmd->fetchAll();
@@ -113,18 +117,49 @@ class DANHMUC {
         }
     }
 
-    // Xóa danh mục
+    // Đếm số lượng sản phẩm thuộc danh mục
+    public function demsanphamtheodanhmuc($id) {
+        $db = DATABASE::connect();
+        try {
+            $cmd = $db->prepare("SELECT COUNT(*) FROM tbl_sanpham WHERE IdDanhMuc = :id");
+            $cmd->bindValue(":id", (int)$id, PDO::PARAM_INT);
+            $cmd->execute();
+            return (int)$cmd->fetchColumn();
+        } catch (PDOException $e) {
+            return 0;
+        }
+    }
+
+    // Xóa danh mục (Chỉ cho phép xóa khi danh mục không còn sản phẩm nào)
     public function xoadanhmuc($danhmuc) {
         $db = DATABASE::connect();
         try {
             $id = is_object($danhmuc) ? ($danhmuc->id ?? $danhmuc->IdDanhMuc) : (int)$danhmuc;
+            
+            // 1. Kiểm tra xem danh mục có còn sản phẩm không
+            $soLuongSp = $this->demsanphamtheodanhmuc($id);
+            if ($soLuongSp > 0) {
+                return [
+                    'success' => false,
+                    'message' => "Không thể xóa! Danh mục này hiện đang có $soLuongSp sản phẩm. Vui lòng chuyển hoặc xóa hết các sản phẩm trước khi xóa danh mục, hoặc sử dụng tính năng 'Khóa' để tạm ẩn danh mục."
+                ];
+            }
+
+            // 2. Nếu không còn sản phẩm thì tiến hành xóa
             $sql = "DELETE FROM tbl_danhmuc WHERE IdDanhMuc = :id";
             $cmd = $db->prepare($sql);
             $cmd->bindValue(":id", $id, PDO::PARAM_INT);
-            return $cmd->execute();
+            $ok = $cmd->execute();
+
+            return [
+                'success' => $ok,
+                'message' => $ok ? 'Đã xóa danh mục thành công.' : 'Không thể xóa danh mục.'
+            ];
         } catch (PDOException $e) {
-            echo "<p>Lỗi xóa danh mục: " . $e->getMessage() . "</p>";
-            return false;
+            return [
+                'success' => false,
+                'message' => 'Lỗi xóa danh mục: ' . $e->getMessage()
+            ];
         }
     }
 }

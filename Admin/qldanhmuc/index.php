@@ -79,12 +79,20 @@ switch ($action) {
 
     case 'xoa':
         if (($_SESSION['user_role'] ?? 2) != 1) {
-            echo "<script>alert('Chỉ Quản trị viên mới có quyền xóa danh mục vĩnh viễn!'); window.location.href='" . $currentScript . "';</script>";
+            echo "<script>alert('Chỉ Quản trị viên mới có quyền xóa danh mục!'); window.location.href='" . $currentScript . "';</script>";
             exit;
         }
         $id = (int)($_REQUEST['id'] ?? 0);
         if ($id > 0) {
-            $dm->xoadanhmuc($id);
+            $result = $dm->xoadanhmuc($id);
+            if (is_array($result) && !$result['success']) {
+                $error = $result['message'];
+                $danhmuc = $dm->laydanhmuc();
+                include 'main.php';
+                exit;
+            } elseif (is_array($result) && $result['success']) {
+                $success = $result['message'];
+            }
         }
         header('Location: ' . $currentScript);
         exit;
